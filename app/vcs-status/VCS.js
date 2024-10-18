@@ -25,7 +25,7 @@ import {
     FaLinkSlash,
 } from 'react-icons/fa6';
 import { DesktopOutlined, SyncOutlined } from '@ant-design/icons';
-import { useSocket } from '@/components/providers/socket-provider';
+import { useSocket } from '@/app/_components/providers/socket-provider';
 
 const { useToken } = theme;
 

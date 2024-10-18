@@ -12,8 +12,7 @@ import {
 import {
   FaMemory
 } from 'react-icons/fa6';
-import SideMenu from '@/components/navigation/SideMenu';
-import { useSocket } from '@/components/providers/socket-provider';
+import { useSocket } from '@/app/_components/providers/socket-provider';
 
 const BoardedCard = styled(Card)`
   border-color: #9c9999;
@@ -136,7 +135,6 @@ const Overview = () => {
   }, [portData, deviceData, vcsData]);
 
   return (
-    <SideMenu>
       <Col span={18} offset={3}>
         <Row justify="space-around">
           {displayData.host.map((host, index) => (
@@ -311,7 +309,6 @@ const Overview = () => {
           ))}
         </Row>
       </Col>
-    </SideMenu >
   )
 };
 export default Overview;

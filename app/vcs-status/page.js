@@ -1,16 +1,13 @@
 import { Suspense } from 'react';
-import Loading from '@/components/ui/loading';
-import SideMenu from '@/components/navigation/SideMenu';
+import Loading from '@/app/_components/ui/loading';
 import VCSStatus from './VCSStatus';
 
 
 const VCSPage = () => {
     return (
-        <SideMenu>
             <Suspense fallback={<Loading />}>
                 <VCSStatus />
             </Suspense>
-        </SideMenu>
     )
 };
 

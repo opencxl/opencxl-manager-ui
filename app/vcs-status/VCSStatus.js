@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Tabs, Typography } from 'antd';
 import { useSearchParams } from 'next/navigation'
 import VCS from '@/app/vcs-status/VCS';
-import { useSocket } from '@/components/providers/socket-provider';
+import { useSocket } from '@/app/_components/providers/socket-provider';
 const { Title } = Typography;
 
 const NoStatus = () => (
@@ -31,17 +31,20 @@ const VCSStatus = () => {
         if (!socket) return;
         const getDevice = () => {
             socket.emit('device:get', (data) => {
-                setDeviceData(data["result"])
+                setDeviceData(data["result"]);
+                console.log("device:get ", data);
             });
         }
         const getPort = () => {
             socket.emit('port:get', (data) => {
                 setPortData(data["result"])
+                console.log("port:get ", data);
             });
         }
         const getVCS = () => {
             socket.emit('vcs:get', (data) => {
                 setVCSData(data["result"]);
+                console.log("vcs:get ", data);
             });
         }
         getDevice();

@@ -1,6 +1,7 @@
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { SocketProvider } from '@/components/providers/socket-provider'
+import { SocketProvider } from '@/app/_components/providers/socket-provider'
+import SideMenu from './_components/navigation/SideMenu'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -13,7 +14,9 @@ export default function RootLayout ({ children }) {
     <html lang="en">
       <body className={inter.className}>
         <SocketProvider>
-          {children}
+          <SideMenu>
+            {children}
+          </SideMenu>
         </SocketProvider>
       </body>
     </html>

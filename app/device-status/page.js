@@ -2,8 +2,7 @@
 
 import { useEffect, useReducer } from 'react';
 import { Table, Space, Tag } from 'antd';
-import SideMenu from '@/components/navigation/SideMenu';
-import { useSocket } from '@/components/providers/socket-provider';
+import { useSocket } from '@/app/_components/providers/socket-provider';
 
 const columns = [
     {
@@ -138,14 +137,12 @@ const DeviceStatus = () => {
 
 
     return (
-        <SideMenu>
             <Table
                 rowKey={record => record.deviceSerialNumber}
                 columns={columns}
                 dataSource={state.deviceData}
                 bordered
             />
-        </SideMenu>
     )
 };
 export default DeviceStatus;

@@ -2,8 +2,7 @@
 
 import { useEffect, useReducer } from 'react';
 import { Table, Tag } from 'antd';
-import SideMenu from '@/components/navigation/SideMenu';
-import { useSocket } from '@/components/providers/socket-provider';
+import { useSocket } from '@/app/_components/providers/socket-provider';
 
 const columns = [
     {
@@ -167,14 +166,12 @@ const PortStatus = () => {
     }, [socket]);
 
     return (
-        <SideMenu>
             <Table
                 rowKey={record => record.portId}
                 columns={columns}
                 dataSource={state.portData}
                 bordered
             />
-        </SideMenu>
     )
 };
 export default PortStatus;
