@@ -20,7 +20,8 @@ export const SocketProvider = ({ children }) => {
     const [connected, setConnected] = useState(false);
 
     useEffect(() => {
-        const socket = IoClient(`http://${window.location.hostname}:8200`);
+        const socket = IoClient(`http://10.40.10.84:8200`);
+        // const socket = IoClient(`http://${window.location.hostname}:8200`);
         socket.on('connect', () => {
             setConnected(true);
         });

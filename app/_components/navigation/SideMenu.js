@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons';
 import styled from 'styled-components';
 import { Layout, Menu, Space, Typography, theme } from 'antd';
-import { SocketIndicator } from '@/components/ui/socket-indicator';
+import { SocketIndicator } from '@/app/_components/ui/socket-indicator';
 const { Text } = Typography;
 const { Header, Sider, Content } = Layout;
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useSocket } from "@/components/providers/socket-provider";
+import { useSocket } from "../providers/socket-provider";
 import { Tag } from "antd";
 
 export const SocketIndicator = () => {
