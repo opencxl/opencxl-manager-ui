@@ -66,7 +66,7 @@ const Overview = () => {
                 vcsData.length === 0
                     ? <NoStatus />
                     : 
-                      <div style={{display:"flex", justifyContent:"center"}}>
+                      <div style={{display:"flex", justifyContent:"center", backgroundColor:"#133036"}}>
                           {vcsData.map((vcs) => {
                               return (<FabricManagerUI
                                       vcs={vcs}

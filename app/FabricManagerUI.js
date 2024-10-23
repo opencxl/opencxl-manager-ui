@@ -26,6 +26,7 @@ import {
 } from 'react-icons/fa6';
 import { DesktopOutlined, SyncOutlined } from '@ant-design/icons';
 import { useSocket } from '@/app/_components/providers/socket-provider';
+import { COLOR } from './color';
 
 const { useToken } = theme;
 
@@ -38,6 +39,7 @@ const ItemCard = styled(BoardedCard)`
   width: 105px;
   z-index: 1;
   word-break: break-word;
+  background-color: ${(props) => props.bgcolor}
 `;
 
 const formatError = (error) => {
@@ -250,6 +252,17 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
         });
     };
 
+    const getUSPId = (sld) => {
+        const device = deviceData.find((data) => data.deviceSerialNumber === sld);
+        if (!device) return undefined;
+    
+        const vcs = vcsData.find((vcs) =>
+            vcs.vppbs.some((vppb) => vppb.boundPortId === device.boundPortId)
+        );
+    
+        return vcs ? vcs.uspId : undefined;
+    }
+
     return (
         <>
             <div style={{display:"flex", flexDirection:"column", width:"20%"}}>
@@ -261,6 +274,7 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
                         bodyStyle={{
                             padding: '15px 10px'
                         }}
+                        bgcolor={COLOR[vcs.uspId]}
                     >
                         <Space direction='vertical' size={0}>
                             <DesktopOutlined style={{ fontSize: 30 }} />
@@ -269,27 +283,22 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
                     </ItemCard>
                 </Row>
                 <Row justify="center">
-                    <Card
-                        bordered={false}
-                        bodyStyle={{
-                            paddingTop: 0,
-                            paddingBottom: 0,
-                        }}
-                        style={{
-                            width: 100,
-                            textAlign: 'center',
-                            opacity: displayData.hostConnected ? 1 : 0,
-                        }}
-                    >
-                        <Divider
-                            type="vertical"
+                    <div style={{display:"flex", opacity: displayData.hostConnected ? 1 : 0,}}>
+                        <div
                             style={{
-                                borderLeft: '2px solid #9c9999',
-                                height: 32,
-                                top: 0,
+                                height:"32px",
+                                borderRight: '2px solid gray',
                             }}
-                        />
-                    </Card>
+                        >
+                        </div>
+                        <div
+                            style={{
+                                height:"32px",
+                                borderLeft: '2px solid gray',
+                            }}
+                        >
+                        </div>
+                    </div>
                 </Row>
                 <Row justify="center">
                     <Link href='/device-status'>
@@ -310,38 +319,35 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
                     </Link>
                 </Row>
                 <Row justify="center">
-                    <Card
-                        bordered={false}
-                        bodyStyle={{
-                            paddingTop: 0,
-                            paddingBottom: 0,
-                        }}
-                        style={{
-                            width: 100,
-                            textAlign: 'center'
-                        }}
-                    >
-                        <Divider
-                            type="vertical"
+                    <div style={{display:"flex"}}>
+                        <div
                             style={{
-                                borderLeft: '2px solid #9c9999',
-                                height: 32,
-                                top: 0,
+                                height:"32px",
+                                borderRight: '2px solid gray',
                             }}
-                        />
-                    </Card>
+                        >
+                        </div>
+                        <div
+                            style={{
+                                height:"32px",
+                                borderLeft: '2px solid gray',
+                            }}
+                        >
+                        </div>
+                    </div>
                 </Row>
                 <BoardedCard
                     bodyStyle={{ padding: 0 }}
+                    bordered={false}
                     style={{
                         textAlign: 'center',
                         justifyContent: 'center'
                     }}
                 >
-                    <Row justify="center" style={{ margin: '50px 0px' }}>
+                    <Row justify="center" style={{ padding: '50px 0px', backgroundColor: "#149185" }}>
                         VCS {data.virtualCxlSwitchId}
                     </Row>
-                    <Row justify="space-between">
+                    <Row justify="space-around" style={{ backgroundColor: "#149185" }}>
                         {data.vppbs.map((vppb, index) => (
                             <Dropdown
                                 menu={{
@@ -440,31 +446,29 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
                         ))}
                     </Row>
                 </BoardedCard >
-                <Row justify="space-between">
+                <Row justify="space-around">
                     {displayData.vPPBToDSP.map((port, index) => (
                         <Col key={`vtd-${index}`}>
-                            <Card
-                                bordered={false}
-                                bodyStyle={{
-                                    paddingTop: 0,
-                                    paddingBottom: 0,
-                                }}
-                                style={{
-                                    width: 100,
-                                    textAlign: 'center',
-                                    opacity: port != null ? 1 : 0
-                                }}
-                            >
-                                <Divider type="vertical" style={{
-                                    borderLeft: '2px solid #9c9999',
-                                    height: 32,
-                                    top: 0,
-                                }} />
-                            </Card>
+                            <div style={{display:"flex", opacity: port != null ? 1 : 0}}>
+                                <div
+                                    style={{
+                                        height:"32px",
+                                        borderRight: '2px solid gray',
+                                    }}
+                                >
+                                </div>
+                                <div
+                                    style={{
+                                        height:"32px",
+                                        borderLeft: '2px solid gray',
+                                    }}
+                                >
+                                </div>
+                            </div>
                         </Col>
                     ))}
                 </Row>
-                <Row justify="space-between">
+                <Row justify="space-around">
                     {displayData.DSP.map((port, index) => (
                         <Col key={`dsp-${index}`}>
                             <ItemCard
@@ -490,34 +494,29 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
                         </Col>
                     ))}
                 </Row >
-                <Row justify="space-between">
+                <Row justify="space-around">
                     {displayData.DSPToSLD.map((port, index) => (
                         <Col key={`dts-${index}`}>
-                            <Card
-                                bordered={false}
-                                bodyStyle={{
-                                    paddingTop: 0,
-                                    paddingBottom: 0,
-                                }}
-                                style={{
-                                    width: 100,
-                                    textAlign: 'center',
-                                    opacity: port != null ? 1 : 0
-                                }}
-                            >
-                                <Divider
-                                    type="vertical"
+                            <div style={{display:"flex", opacity: port != null ? 1 : 0}}>
+                                <div
                                     style={{
-                                        borderLeft: '2px solid #9c9999',
-                                        height: 32,
-                                        top: 0,
+                                        height:"32px",
+                                        borderRight: '2px solid gray',
                                     }}
-                                />
-                            </Card>
+                                >
+                                </div>
+                                <div
+                                    style={{
+                                        height:"32px",
+                                        borderLeft: '2px solid gray',
+                                    }}
+                                >
+                                </div>
+                            </div>
                         </Col>
                     ))}
                 </Row>
-                <Row justify="space-between">
+                <Row justify="space-around">
                     {displayData.SLD.map((sld, index) => (
                         <Col key={`sld-${index}`}>
                             <ItemCard
@@ -529,6 +528,7 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
                                 bodyStyle={{
                                     padding: '15px 10px'
                                 }}
+                                bgcolor={COLOR[getUSPId(sld)]}
                             >
                                 <Link href='/device-status'>
                                     <Space direction='vertical' size={0}>
