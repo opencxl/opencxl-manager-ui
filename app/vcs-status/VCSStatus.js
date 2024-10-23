@@ -32,19 +32,16 @@ const VCSStatus = () => {
         const getDevice = () => {
             socket.emit('device:get', (data) => {
                 setDeviceData(data["result"]);
-                console.log("device:get ", data);
             });
         }
         const getPort = () => {
             socket.emit('port:get', (data) => {
                 setPortData(data["result"])
-                console.log("port:get ", data);
             });
         }
         const getVCS = () => {
             socket.emit('vcs:get', (data) => {
                 setVCSData(data["result"]);
-                console.log("vcs:get ", data);
             });
         }
         getDevice();
