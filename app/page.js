@@ -65,7 +65,7 @@ const Overview = () => {
             backgroundColor: "#133036",
           }}
         >
-          {vcsData.map((vcs) => {
+          {vcsData.map((vcs, index) => {
             return (
               <FabricManagerUI
                 vcs={vcs}
@@ -73,6 +73,7 @@ const Overview = () => {
                 ports={portData}
                 devices={deviceData}
                 handleRefresh={() => setRefresh(!refresh)}
+                key={index}
               />
             );
           })}

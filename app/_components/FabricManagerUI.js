@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Row, Col, Card, Space, FloatButton } from "antd";
+import { Row, Col, Card, Space, FloatButton, Dropdown } from "antd";
 import styled from "styled-components";
 import Link from "next/link";
 import { PiPlugsBold, PiPlugsConnectedBold } from "react-icons/pi";
@@ -9,6 +9,74 @@ import { FaMemory, FaLink, FaLinkSlash } from "react-icons/fa6";
 import { DesktopOutlined, SyncOutlined } from "@ant-design/icons";
 import { COLOR } from "../_data/color";
 import BindUnbindDSP from "./BindUnbindDSP";
+import AllocateDeallocateMLD from "./AllocateDeallocateMLD";
+
+const mldData = [
+  {
+    connectedDeviceMode: "CXL_68B_FLIT_AND_VH_MODE",
+    connectedDeviceType: "CXL_TYPE_3_SLD",
+    currentLinkSpeed: 0,
+    currentPortConfigurationState: "DSP",
+    firstNegotiatedLaneNumber: 0,
+    linkStateFlags: 0,
+    ltssmState: "L0",
+    maxLinkSpeed: 0,
+    maximumLinkWidth: 0,
+    negotiatedLinkWidth: 0,
+    portId: 99,
+    supportedCxlModes: 2,
+    supportedLdCount: 0,
+    supportedLinkSpeedsVector: 0,
+  },
+  {
+    connectedDeviceMode: "CXL_68B_FLIT_AND_VH_MODE",
+    connectedDeviceType: "CXL_TYPE_3_SLD",
+    currentLinkSpeed: 0,
+    currentPortConfigurationState: "DSP",
+    firstNegotiatedLaneNumber: 0,
+    linkStateFlags: 0,
+    ltssmState: "L0",
+    maxLinkSpeed: 0,
+    maximumLinkWidth: 0,
+    negotiatedLinkWidth: 0,
+    portId: 98,
+    supportedCxlModes: 2,
+    supportedLdCount: 0,
+    supportedLinkSpeedsVector: 0,
+  },
+  {
+    connectedDeviceMode: "CXL_68B_FLIT_AND_VH_MODE",
+    connectedDeviceType: "CXL_TYPE_3_SLD",
+    currentLinkSpeed: 0,
+    currentPortConfigurationState: "DSP",
+    firstNegotiatedLaneNumber: 0,
+    linkStateFlags: 0,
+    ltssmState: "L0",
+    maxLinkSpeed: 0,
+    maximumLinkWidth: 0,
+    negotiatedLinkWidth: 0,
+    portId: 97,
+    supportedCxlModes: 2,
+    supportedLdCount: 0,
+    supportedLinkSpeedsVector: 0,
+  },
+  {
+    connectedDeviceMode: "CXL_68B_FLIT_AND_VH_MODE",
+    connectedDeviceType: "CXL_TYPE_3_SLD",
+    currentLinkSpeed: 0,
+    currentPortConfigurationState: "DSP",
+    firstNegotiatedLaneNumber: 0,
+    linkStateFlags: 0,
+    ltssmState: "L0",
+    maxLinkSpeed: 0,
+    maximumLinkWidth: 0,
+    negotiatedLinkWidth: 0,
+    portId: 96,
+    supportedCxlModes: 2,
+    supportedLdCount: 0,
+    supportedLinkSpeedsVector: 0,
+  },
+];
 
 const BoardedCard = styled(Card)`
   border-color: #9c9999;
@@ -26,7 +94,6 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
   // console.log("devices: ", devices);
   // console.log("ports: ", ports);
   // console.log("vcses: ", vcses);
-  // console.log("handleRefresh: ", handleRefresh);
   const [data, setData] = useState(vcs);
   const [deviceData, setDeviceData] = useState(devices);
   const [portData, setPortData] = useState(ports);
@@ -36,8 +103,10 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
     hostConnected: false,
     vPPBToDSP: [],
     DSP: [],
-    DSPToSLD: [],
+    DSPToSLDMLD: [],
     SLD: [],
+    // MLD
+    MLD: [],
     processing: [],
     unBindedPort: [],
   });
@@ -56,9 +125,11 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
     }
     const vPPBToDSP = [];
     const DSP = [];
-    const DSPToSLD = [];
+    const DSPToSLDMLD = [];
     const SLD = [];
     const processing = [];
+    // MLD
+    const MLD = [];
     data.vppbs.forEach((vppb) => {
       if (vppb.boundPortId) {
         processing.push(
@@ -72,14 +143,14 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
             (device) => device.boundPortId === dsp.portId
           );
           if (device) {
-            DSPToSLD.push(dsp.portId);
+            DSPToSLDMLD.push(dsp.portId);
             SLD.push(device.deviceSerialNumber);
           } else {
-            DSPToSLD.push(null);
+            DSPToSLDMLD.push(null);
             SLD.push("X".repeat(16));
           }
         } else {
-          DSPToSLD.push(null);
+          DSPToSLDMLD.push(null);
           SLD.push("X".repeat(16));
         }
       } else {
@@ -88,7 +159,7 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
         );
         vPPBToDSP.push(null);
         DSP.push(null);
-        DSPToSLD.push(null);
+        DSPToSLDMLD.push(null);
         SLD.push("X".repeat(16));
       }
     });
@@ -111,17 +182,20 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
         !bindedPort.includes(port.portId) &&
         port.currentPortConfigurationState === "DSP"
     );
-
+    // MLD
+    MLD.push(mldData[0], mldData[1], mldData[2], mldData[3]);
     // console.log("vPPBToDSP: ", vPPBToDSP);
     // console.log("DSP: ", DSP);
-    // console.log("DSPToSLD: ", DSPToSLD);
+    // console.log("DSPToSLDMLD: ", DSPToSLDMLD);
     // console.log("SLD: ", SLD);
     setDisplayData({
       hostConnected,
       vPPBToDSP,
       DSP,
-      DSPToSLD,
+      DSPToSLDMLD,
       SLD,
+      // MLD
+      MLD,
       processing,
       unBindedPort,
     });
@@ -140,7 +214,7 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
 
   return (
     <>
-      <div style={{ display: "flex", flexDirection: "column", width: "20%" }}>
+      <div style={{ display: "flex", flexDirection: "column", width: "80%" }}>
         <Row justify="center">
           <ItemCard
             style={{
@@ -239,6 +313,9 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
               />
             ))}
           </Row>
+          <Row
+            style={{ padding: "10px 0px", backgroundColor: "#149185" }}
+          ></Row>
         </BoardedCard>
         <Row justify="space-around">
           {displayData.vPPBToDSP.map((port, index) => (
@@ -276,7 +353,7 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
               >
                 <Link href="/port-status">
                   <Space direction="vertical" size={0}>
-                    {displayData.DSPToSLD[index] != null ? (
+                    {displayData.DSPToSLDMLD[index] != null ? (
                       <PiPlugsConnectedBold style={{ fontSize: 25 }} />
                     ) : (
                       <PiPlugsBold style={{ fontSize: 25 }} />
@@ -290,8 +367,8 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
           ))}
         </Row>
         <Row justify="space-around">
-          {displayData.DSPToSLD.map((port, index) => (
-            // console.log("Iterater DSPToSLD: ", port),
+          {displayData.DSPToSLDMLD.map((port, index) => (
+            // console.log("Iterater DSPToSLDMLD: ", port),
             <Col key={`dts-${index}`}>
               <div style={{ display: "flex", opacity: port != null ? 1 : 0 }}>
                 <div
@@ -312,12 +389,22 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
         </Row>
         {/* 바인딩 및 바인딩 해제는 vcs와 vbbp 데이터로만 하기 때문에 vbbp 를 굳이 dsp sld 와 묶을 필요가 없을 것 같다. */}
         <Row justify="space-around">
-          {/* vcs-vppbs에 연결된 DSP가 같은 sld 모두 나열 */}
-          {vcs.vppbs.map((vppb) => (
-            <div style={{ display: "flex", flexDirection: "column" }}>
+          {vcs.vppbs.map((vppb, index) => (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                padding: "10px",
+                backgroundColor: "white",
+              }}
+              key={index}
+            >
               {deviceData.map((device, index) =>
+                // device의 boundPortId 와 vppb
                 vppb.boundPortId === device.boundPortId ? (
-                  <>
+                  // SLD, MLD 분기 나누기
+                  // 원래는 SLD, MLD를 나타내는 속성으로 해야하는데 없으니까 일단 pcieDeviceId로
+                  !device.pcieDeviceId ? (
                     <Col key={index}>
                       <ItemCard
                         hoverable
@@ -336,18 +423,53 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
                         }}
                         bgcolor={COLOR[getUSPId(device.deviceSerialNumber)]}
                       >
-                        <Link href="/device-status">
-                          <Space direction="vertical" size={0}>
-                            <FaMemory style={{ fontSize: 25 }} />
-                            <span>{`SLD "${device.deviceSerialNumber}"`}</span>
-                          </Space>
-                        </Link>
+                        {/* <Link href="/device-status"> */}
+                        <Space direction="vertical" size={0}>
+                          <FaMemory style={{ fontSize: 25 }} />
+                          <span>{`SLD "${device.deviceSerialNumber}"`}</span>
+                        </Space>
+                        {/* </Link> */}
                       </ItemCard>
                     </Col>
-                  </>
-                ) : (
-                  ""
-                )
+                  ) : (
+                    <Dropdown
+                      // MLD - MLD 및 UnBindedPort 나오도록 작동
+                      dropdownRender={() => (
+                        <AllocateDeallocateMLD vcses={vcses} device={device} />
+                      )}
+                      placement="bottom"
+                      trigger={["click"]}
+                      key={`vppb-bind-${index}`}
+                    >
+                      <Col>
+                        <ItemCard
+                          hoverable
+                          style={{
+                            opacity:
+                              device.deviceSerialNumber !== "X".repeat(16)
+                                ? 1
+                                : 0,
+                            pointerEvents:
+                              device.deviceSerialNumber !== "X".repeat(16)
+                                ? "auto"
+                                : "none",
+                          }}
+                          bodyStyle={{
+                            padding: "15px 10px",
+                          }}
+                          bgcolor={COLOR[getUSPId(device.deviceSerialNumber)]}
+                        >
+                          {/* <Link href="/device-status"> */}
+                          <Space direction="vertical" size={0}>
+                            <FaMemory style={{ fontSize: 25 }} />
+                            <span>{`MLD "${device.deviceSerialNumber}"`}</span>
+                          </Space>
+                          {/* </Link> */}
+                        </ItemCard>
+                      </Col>
+                    </Dropdown>
+                  )
+                ) : null
               )}
             </div>
           ))}

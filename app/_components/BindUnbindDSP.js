@@ -11,9 +11,9 @@ import {
   Card,
   Space,
 } from "antd";
+import styled from "styled-components";
 import { FaLink, FaLinkSlash } from "react-icons/fa6";
 import { SyncOutlined } from "@ant-design/icons";
-import styled from "styled-components";
 import { handleBindUnbind } from "../_utils/handleBindUnbind";
 
 const { useToken } = theme;
@@ -130,11 +130,14 @@ const BindUnbindDSP = ({ displayData, index, vppb, vcs, handleRefresh }) => {
   return (
     <>
       <Dropdown
+        // MLD - MLD 및 UnBindedPort 나오도록 작동
         menu={{
-          items: displayData.unBindedPort.map((port) => ({
-            label: `DSP ${port.portId}`,
-            key: `${port.portId}`,
-          })),
+          items: [...displayData.unBindedPort, ...displayData.MLD].map(
+            (port) => ({
+              label: `DSP ${port.portId}`,
+              key: `${port.portId}`,
+            })
+          ),
           onClick: ({ key }) => {
             handleSelectDSP(key);
           },
@@ -174,22 +177,6 @@ const BindUnbindDSP = ({ displayData, index, vppb, vcs, handleRefresh }) => {
                 fresh
               >
                 {displayData.vPPBToDSP[index] != null ? (
-                  // <Button
-                  //   type="primary"
-                  //   loading={open.loading}
-                  //   onClick={() =>
-                  //     handleUnbind(
-                  //       vcs.virtualCxlSwitchId,
-                  //       index,
-                  //       open,
-                  //       setOpen,
-                  //       handleClose,
-                  //       showError,
-                  //       handleRefresh,
-                  //       socket
-                  //     )
-                  //   }
-                  // >
                   <Button
                     type="primary"
                     loading={open.loading}
