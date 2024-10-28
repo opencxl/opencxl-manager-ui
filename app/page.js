@@ -62,7 +62,7 @@ const Overview = () => {
           style={{
             display: "flex",
             justifyContent: "center",
-            backgroundColor: "#133036",
+            // backgroundColor: "#133036",
           }}
         >
           {vcsData.map((vcs, index) => {
