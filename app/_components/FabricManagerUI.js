@@ -11,6 +11,14 @@ import { COLOR } from "../_data/color";
 import BindUnbindDSP from "./BindUnbindDSP";
 import AllocateDeallocateMLD from "./AllocateDeallocateMLD";
 
+const lds = [
+  { id: "1000", used: true, host: "3" },
+  { id: "1001", used: false, host: null },
+  { id: "1002", used: false, host: null },
+  { id: "1003", used: true, host: "3" },
+  { id: "1004", used: true, host: "3" },
+];
+
 const mldData = [
   {
     connectedDeviceMode: "CXL_68B_FLIT_AND_VH_MODE",
@@ -201,8 +209,8 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
     });
   }, [data, deviceData, portData, vcsData]);
 
-  const getUSPId = (sld) => {
-    const device = deviceData.find((data) => data.deviceSerialNumber === sld);
+  const getUSPIdByLD = (ld) => {
+    const device = deviceData.find((data) => data.deviceSerialNumber === ld);
     if (!device) return undefined;
 
     const vcs = vcsData.find((vcs) =>
@@ -297,7 +305,7 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
         >
           <Row
             justify="center"
-            style={{ padding: "50px 0px", backgroundColor: "#149185" }}
+            style={{ padding: "25px 0px", backgroundColor: "#149185" }}
           >
             VCS {data.virtualCxlSwitchId}
           </Row>
@@ -396,6 +404,7 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
                 flexDirection: "column",
                 padding: "10px",
                 backgroundColor: "white",
+                border: "1px solid black",
               }}
               key={index}
             >
@@ -421,7 +430,7 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
                         bodyStyle={{
                           padding: "15px 10px",
                         }}
-                        bgcolor={COLOR[getUSPId(device.deviceSerialNumber)]}
+                        bgcolor={COLOR[getUSPIdByLD(device.deviceSerialNumber)]}
                       >
                         {/* <Link href="/device-status"> */}
                         <Space direction="vertical" size={0}>
@@ -434,8 +443,17 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
                   ) : (
                     <Dropdown
                       // MLD - MLD 및 UnBindedPort 나오도록 작동
-                      dropdownRender={() => (
-                        <AllocateDeallocateMLD vcses={vcses} device={device} />
+                      // ld를 menu로 넘기고, 여기서 ld 까지 보여줘야함
+                      menu={{
+                        items: lds,
+                      }}
+                      dropdownRender={(menu) => (
+                        <AllocateDeallocateMLD
+                          vcses={vcses}
+                          device={device}
+                          lds={menu.props.items}
+                          handleRefresh={handleRefresh}
+                        />
                       )}
                       placement="bottom"
                       trigger={["click"]}
@@ -457,13 +475,41 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
                           bodyStyle={{
                             padding: "15px 10px",
                           }}
-                          bgcolor={COLOR[getUSPId(device.deviceSerialNumber)]}
                         >
                           {/* <Link href="/device-status"> */}
-                          <Space direction="vertical" size={0}>
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                            }}
+                            size={0}
+                          >
                             <FaMemory style={{ fontSize: 25 }} />
                             <span>{`MLD "${device.deviceSerialNumber}"`}</span>
-                          </Space>
+                            <div
+                              style={{
+                                width: "90%",
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "5px",
+                              }}
+                            >
+                              {lds.map((ld) => {
+                                return (
+                                  <div
+                                    style={{
+                                      backgroundColor: ld.used
+                                        ? COLOR[ld.host]
+                                        : "#eee",
+                                    }}
+                                  >
+                                    {`LD ${ld.id}`}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
                           {/* </Link> */}
                         </ItemCard>
                       </Col>

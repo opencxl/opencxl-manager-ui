@@ -1,26 +1,10 @@
+import { useSocket } from "@/app/_components/providers/socket-provider";
 import React, { useState, useEffect } from "react";
 
-const lds = [
-  { id: "1000", used: true },
-  { id: "1001", used: false },
-  { id: "1002", used: false },
-  { id: "1003", used: true },
-  { id: "1004", used: true },
-];
-
 const AllocatorTab = ({ connectedVCSES, deviceWithLD, handleAllocate }) => {
-  console.log("connectecVCSES: ", connectedVCSES);
-
-  // console.log("deviceWithLD: ", deviceWithLD);
   const [availableDevices, setAvailableDevices] = useState([]);
   const [selectedHost, setSelectedHost] = useState(null);
   const [selectedLogicalDevice, setSelectedLogicalDevice] = useState([]);
-  // console.log(
-  //   "connectecVCSES??: ",
-  //   connectedVCSES.find((vcs) => vcs.uspId === Number(selectedHost))
-  //     .virtualCxlSwitchId
-  // );
-  console.log("selectedLogicalDevice: ", selectedLogicalDevice);
   useEffect(() => {
     if (selectedHost === "reset") {
       setAvailableDevices([]);
@@ -38,11 +22,6 @@ const AllocatorTab = ({ connectedVCSES, deviceWithLD, handleAllocate }) => {
 
   const handleReset = () => {
     setSelectedLogicalDevice([]);
-  };
-
-  const test = () => {
-    console.log("selectedHost: ", selectedHost);
-    console.log("selectedLogicalDevice: ", selectedLogicalDevice);
   };
 
   return (
@@ -135,7 +114,7 @@ const AllocatorTab = ({ connectedVCSES, deviceWithLD, handleAllocate }) => {
   );
 };
 
-const DeAllocatorTab = ({ connectedVCSES, deviceWithLD, handleAllocate }) => {
+const DeAllocatorTab = ({ connectedVCSES, deviceWithLD, handleDeAllocate }) => {
   const [availableDevices, setAvailableDevices] = useState([]);
   const [selectedHost, setSelectedHost] = useState(null);
   const [selectedLogicalDevice, setSelectedLogicalDevice] = useState([]);
@@ -208,19 +187,17 @@ const DeAllocatorTab = ({ connectedVCSES, deviceWithLD, handleAllocate }) => {
       </div>
       <div style={{ display: "flex" }}>
         <div
-          onClick={
-            // 값이 설정되어있지 않을 때 에러처리 필요
-            () =>
-              handleAllocate({
-                virtualCxlSwitchId: connectedVCSES.find(
-                  (vsc) => vsc.uspId === Number(selectedHost)
-                ).virtualCxlSwitchId,
-                matchVppbId: connectedVCSES.find(
-                  (vsc) => vsc.uspId === Number(selectedHost)
-                ).matchVppbId,
-                boundPortId: deviceWithLD.boundPortId,
-                selectedLogicalDevice: selectedLogicalDevice,
-              })
+          onClick={() =>
+            handleDeAllocate({
+              virtualCxlSwitchId: connectedVCSES.find(
+                (vsc) => vsc.uspId === Number(selectedHost)
+              ).virtualCxlSwitchId,
+              matchVppbId: connectedVCSES.find(
+                (vsc) => vsc.uspId === Number(selectedHost)
+              ).matchVppbId,
+              boundPortId: deviceWithLD.boundPortId,
+              selectedLogicalDevice: selectedLogicalDevice,
+            })
           }
           style={{
             padding: "1px 5px",
@@ -249,8 +226,9 @@ const DeAllocatorTab = ({ connectedVCSES, deviceWithLD, handleAllocate }) => {
   );
 };
 
-const AllocateDeallocateMLD = ({ vcses, device }) => {
-  // device에 ld에 대한 정보들이 있을거라고 가정한다.
+const AllocateDeallocateMLD = ({ vcses, device, lds, handleRefresh }) => {
+  const { socket } = useSocket();
+
   const [tab, setTab] = useState("allocator");
   const [connectedVCSES, setConnectedVCSES] = useState([]);
   const [deviceWithLD, setDeviceWithLD] = useState({ logicalDevice: [{}] });
@@ -287,12 +265,71 @@ const AllocateDeallocateMLD = ({ vcses, device }) => {
     boundPortId,
     selectedLogicalDevice,
   }) => {
-    console.log("!!!");
+    console.log(
+      `Allocate MLD's LD ${selectedLogicalDevice} to Host ${virtualCxlSwitchId}`
+    );
     console.log("virtualCxlSwitchId: ", virtualCxlSwitchId);
     console.log("matchVppbId: ", matchVppbId);
     console.log("boundPortId: ", boundPortId);
     console.log("selectedLogicalDevice: ", selectedLogicalDevice);
+    socket.emit(
+      "vcs:allocate",
+      {
+        virtualCxlSwitchId: virtualCxlSwitchId,
+        vppbId: matchVppbId,
+        physicalPortId: Number(boundPortId),
+      },
+      (args) => {
+        // if (args.error) {
+        //   setOpen({
+        //     ...open,
+        //     loading: false,
+        //   });
+        //   showError(args.error, vppb);
+        //   return;
+        // }
+        // handleClose();
+        console.log("allcoate response: ", args);
+        handleRefresh();
+      }
+    );
     // 소켓 통신으로 서버에 데이터 전송하는 로직 추가
+  };
+
+  const handleDeAllocate = ({
+    virtualCxlSwitchId,
+    matchVppbId,
+    boundPortId,
+    selectedLogicalDevice,
+  }) => {
+    console.log(
+      `DeAllocate MLD's LD ${selectedLogicalDevice} to Host ${virtualCxlSwitchId}`
+    );
+    console.log("virtualCxlSwitchId: ", virtualCxlSwitchId);
+    console.log("matchVppbId: ", matchVppbId);
+    console.log("boundPortId: ", boundPortId);
+    console.log("selectedLogicalDevice: ", selectedLogicalDevice);
+    socket.emit(
+      "vcs:deallocate",
+      {
+        virtualCxlSwitchId: virtualCxlSwitchId,
+        vppbId: matchVppbId,
+        physicalPortId: Number(boundPortId),
+      },
+      (args) => {
+        // if (args.error) {
+        //   setOpen({
+        //     ...open,
+        //     loading: false,
+        //   });
+        //   showError(args.error, vppb);
+        //   return;
+        // }
+        // handleClose();
+        console.log("Deallcoate response: ", args);
+        handleRefresh();
+      }
+    );
   };
 
   return (
@@ -341,7 +378,7 @@ const AllocateDeallocateMLD = ({ vcses, device }) => {
         <DeAllocatorTab
           connectedVCSES={connectedVCSES}
           deviceWithLD={deviceWithLD}
-          handleAllocate={handleAllocate}
+          handleDeAllocate={handleDeAllocate}
         />
       )}
     </div>
