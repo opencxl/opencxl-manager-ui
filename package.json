@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@xyflow/react": "^12.3.3",
     "antd": "^5.10.3",
     "next": "14.0.1",
     "react": "^18",
