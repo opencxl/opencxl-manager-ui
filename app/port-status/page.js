@@ -92,7 +92,7 @@ const PortStatus = () => {
       port.boundStatus = {};
       if (port.currentPortConfigurationState === "DSP") {
         vcsData.forEach((vcs) => {
-          vcs.vppbs.forEach((vppb, index) => {
+          vcs.ppb_info_list.forEach((vppb, index) => {
             if (vppb.boundPortId === port.portId) {
               port.boundStatus = {
                 bound: true,

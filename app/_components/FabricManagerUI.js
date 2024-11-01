@@ -138,7 +138,7 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
     const processing = [];
     // MLD
     const MLD = [];
-    data.vppbs.forEach((vppb) => {
+    data.ppb_info_list.forEach((vppb) => {
       if (vppb.boundPortId) {
         processing.push(
           vppb.bindingStatus === "BIND_OR_UNBIND_IN_PROGRESS" ? true : false
@@ -175,7 +175,7 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
     const bindedPort = vcsData.reduce(
       (record, vcs) => [
         ...record,
-        ...vcs.vppbs
+        ...vcs.ppb_info_list
           .filter(
             (vppb) =>
               vppb.bindingStatus === "BOUND_PHYSICAL_PORT" ||
@@ -214,7 +214,7 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
     if (!device) return undefined;
 
     const vcs = vcsData.find((vcs) =>
-      vcs.vppbs.some((vppb) => vppb.boundPortId === device.boundPortId)
+      vcs.ppb_info_list.some((vppb) => vppb.boundPortId === device.boundPortId)
     );
 
     return vcs ? vcs.uspId : undefined;
@@ -310,7 +310,7 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
             VCS {data.virtualCxlSwitchId}
           </Row>
           <Row justify="space-around" style={{ backgroundColor: "#149185" }}>
-            {data.vppbs.map((vppb, index) => (
+            {data.ppb_info_list.map((vppb, index) => (
               <BindUnbindDSP
                 displayData={displayData}
                 index={index}
@@ -397,7 +397,7 @@ const FabricManagerUI = ({ vcs, devices, ports, vcses, handleRefresh }) => {
         </Row>
         {/* 바인딩 및 바인딩 해제는 vcs와 vbbp 데이터로만 하기 때문에 vbbp 를 굳이 dsp sld 와 묶을 필요가 없을 것 같다. */}
         <Row justify="space-around">
-          {vcs.vppbs.map((vppb, index) => (
+          {vcs.ppb_info_list.map((vppb, index) => (
             <div
               style={{
                 display: "flex",

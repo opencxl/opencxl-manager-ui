@@ -243,10 +243,12 @@ const AllocateDeallocateMLD = ({ vcses, device, lds, handleRefresh }) => {
   useEffect(() => {
     const connectedVCSES = vcses
       .filter((vcs) =>
-        vcs.vppbs.some((vppb) => vppb.boundPortId === device.boundPortId)
+        vcs.ppb_info_list.some(
+          (vppb) => vppb.boundPortId === device.boundPortId
+        )
       )
       .map((vcs) => {
-        const matchVppbId = vcs.vppbs
+        const matchVppbId = vcs.ppb_info_list
           .filter((vppb) => vppb.boundPortId === device.boundPortId)
           .map((vppb) => vppb.vppbId)[0];
 

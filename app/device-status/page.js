@@ -78,7 +78,7 @@ const DeviceStatus = () => {
       if (device.boundPortId) {
         device.boundStatus = {};
         vcsData.forEach((vcs) => {
-          vcs.vppbs.forEach((vppb, index) => {
+          vcs.ppb_info_list.forEach((vppb, index) => {
             if (vppb.boundPortId === device.boundPortId) {
               device.boundStatus = {
                 bound: true,
