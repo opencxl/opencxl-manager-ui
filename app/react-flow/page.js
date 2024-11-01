@@ -7,35 +7,43 @@ import "@xyflow/react/dist/style.css";
 
 const initialNodes = [
   {
+    id: "0",
+    type: "group",
+    position: { x: 0, y: 0 },
+    style: { width: "100px", height: "200px" },
+  },
+  {
     id: "1",
     position: { x: 0, y: 0 },
-    data: { label: "1", connected: false, type: "host" },
+    data: { label: "1", endpoint: "host" },
     style: { width: "50px" },
   },
   {
     id: "2",
     position: { x: 150, y: 0 },
-    data: { label: "2", connected: false, type: "host" },
+    data: { label: "2", endpoint: "host" },
     style: { width: "50px" },
   },
   {
     id: "3",
     position: { x: 300, y: 0 },
-    data: { label: "3", connected: false, type: "host" },
+    data: { label: "3", endpoint: "host" },
     style: { width: "50px" },
   },
   {
     id: "4",
     position: { x: 450, y: 0 },
-    data: { label: "4", connected: false, type: "host" },
+    data: { label: "4", endpoint: "host" },
     style: { width: "50px" },
   },
   {
     id: "5",
     position: { x: 0, y: 100 },
-    data: { label: "5", connected: false, type: "device" },
     // device에는 연결된 host도 표시가 되어야 할거 같음
+    data: { label: "5", endpoint: "device" },
     style: { width: "50px" },
+    parentId: "1",
+    extend: "parent",
     // dragging: false,
     // draggable: false,
     // deletable: false,
@@ -44,84 +52,49 @@ const initialNodes = [
   },
 ];
 
-const TestReactFlow = () => {
-  const initialEdges = [
-    { id: "e5-1", source: "5", target: "" },
-    { id: "e5-2", source: "5", target: "" },
-    { id: "e5-3", source: "5", target: "" },
-    { id: "e5-4", source: "5", target: "" },
-  ];
+const initialEdges = [
+  { id: "e5-1", source: "1", target: "" },
+  { id: "e5-2", source: "2", target: "5" },
+  { id: "e5-3", source: "3", target: "5" },
+  { id: "e5-4", source: "4", target: "5" },
+];
 
+const TestReactFlow = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgeschange] = useNodesState(initialEdges);
   const [unConnectedNodes, setUnConnectedNodes] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [selectedHost, setSelectedHost] = useState(null);
-  console.log("initialNodes: ", initialNodes);
-  // console.log("unConnected: ", unConnectedNodes);
-  // console.log("selectedDevice: ", selectedDevice);
-  // console.log("selectedHost: ", selectedHost);
-  // console.log("selectedHost: ", selectedHost);
+  console.log("nodes: ", nodes);
+  console.log("edges: ", edges);
+
   useEffect(() => {
-    console.log("Nodes state updated:", initialNodes);
-  }, [initialNodes]);
+    console.log("Nodes state updated:", nodes);
+  }, [nodes]);
 
   const handleBindUnbind = () => {
-    const targetEdge = initialEdges.find((edge) => {
+    const sourceEdge = edges.find((edge) => {
       const match = edge.id.match(/^e5-(\d+)$/);
       return match && match[1] === selectedHost;
     });
+    console.log("sourceEdge: ", sourceEdge);
     console.log("click");
     setEdges((prevEdges) =>
       prevEdges.map((edge) =>
-        edge.id === targetEdge.id
+        edge.id === sourceEdge.id
           ? {
               ...edge,
-              target: edge.target == selectedHost ? "" : selectedHost,
+              target: edge.target == selectedDevice ? "" : selectedDevice,
             }
           : edge
       )
     );
-    setNodes((nodes) =>
-      nodes.map((node) => {
-        if (node.id === selectedHost) {
-          console.log("Updating node:", node.id); // 노드 업데이트 로그
-          console.log("node: ", node.data);
-          return {
-            ...node,
-            data: { ...node.data, connected: true },
-          };
-        }
-        return node;
-        // console.log(
-        //   "node id: ",
-        //   typeof node.id,
-        //   "selectedHost: ",
-        //   typeof selectedHost,
-        //   "current connected state: ",
-        //   node.data.connected,
-        //   "compare: ",
-        //   node.id === selectedHost
-        // );
-        // return node.id === selectedHost
-        //   ? {
-        //       ...node,
-        //       data: { ...node.data, connected: true },
-        //     }
-        //   : node;
-      })
-    );
   };
 
-  // if (edges[0].target === "") {
-  //   setEdges([{ id: "e1-2", source: "1", target: "2" }]);
-  // } else if (edges[0].target === "2") {
-  //   setEdges([{ id: "e1-2", source: "1", target: "" }]);
-  // }
   const handleNode = (e) => {
     const id = e.currentTarget.dataset.id;
     const unConnected = initialNodes.filter(
-      (node) => node.data.type === "device"
+      (node) => node.data?.endpoint === "device"
     );
 
     console.log("id: ", id);
