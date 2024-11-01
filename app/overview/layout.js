@@ -1,18 +1,15 @@
 "use client";
 
 import React from "react";
-
 import "@xyflow/react/dist/style.css";
-import { DialogProvider } from "./_components/Dialog";
 
-const Layout = ({ children, host, ld, cxlswitch }) => {
+const Layout = ({ host, ld, cxlswitch }) => {
   return (
-    <>
-      {children}
+    <div className="w-screen h-screen bg-gray-200 flex flex-col justify-center items-center">
       {host}
-      {ld}
       {cxlswitch}
-    </>
+      {ld}
+    </div>
   );
 };
 

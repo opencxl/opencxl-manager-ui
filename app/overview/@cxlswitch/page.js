@@ -1,4 +1,4 @@
-const CXLSwitch = () => {
+const Switch = () => {
   return (
     <>
       <h1>SWICH</h1>
@@ -6,4 +6,4 @@ const CXLSwitch = () => {
   );
 };
 
-export default CXLSwitch;
+export default Switch;

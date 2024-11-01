@@ -1,8 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SocketProvider } from "@/app/_components/providers/socket-provider";
-import { Suspense } from "react";
-import Loading from "./_components/ui/loading";
 
 const inter = Inter({ subsets: ["latin"] });
 
