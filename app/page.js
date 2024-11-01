@@ -111,7 +111,9 @@ const Overview = () => {
           SLD.push("X".repeat(16));
         }
         const foundVCS = vcsData.find((vcs) => {
-          return vcs.vppbs.find((vppb) => vppb.boundPortId === port.portId);
+          return vcs.ppb_info_list.find(
+            (vppb) => vppb.boundPortId === port.portId
+          );
         });
         if (foundVCS) {
           DSPVCS.push(foundVCS.virtualCxlSwitchId);
