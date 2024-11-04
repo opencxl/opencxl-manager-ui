@@ -2,11 +2,22 @@ export const processCXLSocketData = ({ portData, vcsData }) => {
   const host = [];
   const vcs = [];
   const device = [];
+  const ppb = [];
 
   portData.forEach((port) => {
     if (port.currentPortConfigurationState === "USP") {
       if (port.ltssmState === "L0") {
         host.push({ portType: "USP", portId: port.portId });
+        vcs.push({
+          uspId: port.portId,
+          hostPort: true,
+          vppb: {
+            bindingStatus: null,
+            boundLdId: null,
+            boundPortId: port.portId,
+            vppbId: null,
+          },
+        });
       } else {
         host.push(null);
       }
@@ -17,8 +28,14 @@ export const processCXLSocketData = ({ portData, vcsData }) => {
           portId: port.portId,
           boundVPPBId: null,
         });
+        ppb.push({
+          portType: "DSP",
+          portId: port.portId,
+          boundVPPBId: null,
+        });
       } else {
         device.push(null);
+        ppb.push(null);
       }
     }
   });
@@ -50,5 +67,6 @@ export const processCXLSocketData = ({ portData, vcsData }) => {
     host,
     vcs,
     device,
+    ppb,
   };
 };
