@@ -44,11 +44,16 @@ export const processCXLSocketData = ({ portData, vcsData }) => {
     data.ppb_info_list.forEach((vppb) => {
       if (vppb.bindingStatus === "UNBOUND") {
         vcs.push({
+          virtualCxlSwitchId: data.virtualCxlSwitchId,
           uspId: data.uspId,
           vppb: { ...vppb, hostId: null, boundPortId: null },
         });
       } else if (vppb.bindingStatus === "BOUND_LD") {
-        vcs.push({ uspId: data.uspId, vppb: vppb });
+        vcs.push({
+          virtualCxlSwitchId: data.virtualCxlSwitchId,
+          uspId: data.uspId,
+          vppb: vppb,
+        });
       }
     });
   });

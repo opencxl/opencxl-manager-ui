@@ -44,7 +44,6 @@ export const processInitialEdges = ({ nodes, initialEdges }) => {
       }
     });
   });
-  console.log("vppbsForUSP: ", vppbsForUSP);
 
   ppbs.forEach((ppb) => {
     devices.map((device) => {

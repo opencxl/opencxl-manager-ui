@@ -51,7 +51,7 @@ export const processInitialNodes = ({
 
   host.map((data, index) => {
     initialNodes.push({
-      id: `host${data.portId}`,
+      id: `host_${data.portId}`,
       position: { x: gap + index * (boxWidth + gap) || 0, y: 43 },
       data: { ...data, type: "host", label: `Host ${data.portId}` },
       type: "input",
@@ -67,49 +67,51 @@ export const processInitialNodes = ({
   });
 
   vcs.map((data, index) => {
-    data.hostPort
-      ? initialNodes.push({
-          id: `host${data.uspId}_vppbForUSP`,
-          position: { x: gap + index * (boxWidth + gap) || 0, y: 40 },
-          data: {
-            ...data,
-            type: "vppb",
-            label: "vPPB USP",
-          },
-          style: {
-            width: "180px",
-            height: "60px",
-            backgroundColor: "#ACA9F1",
-            border: "none",
-            borderRadius: "8px",
-            boxShadow: "5px 5px 1px #565478",
-          },
-          parentId: "vppb",
-          extend: "parent",
-        })
-      : initialNodes.push({
-          id: `host${data.uspId}_vppb${data.vppb.vppbId}`,
-          position: { x: (index - 1) * 200 || 0, y: 180 }, // vsc 위치에 맞추서 수정 필요
-          data: {
-            ...data,
-            type: "vppb",
-            label: `vPPB ${data.vppb.vppbId}`,
-          },
-          style: {
-            width: "180px",
-            height: "60px",
-            backgroundColor: "#ACA9F1",
-            border: "none",
-            borderRadius: "8px",
-            boxShadow: "5px 5px 1px #565478",
-          },
-          parentId: "vppb",
-          extend: "parent",
-        });
+    console.log("data: ", data),
+      data.hostPort
+        ? initialNodes.push({
+            id: `USP_vppb_host_${data.uspId}`,
+            position: { x: gap + index * (boxWidth + gap) || 0, y: 40 },
+            data: {
+              ...data,
+              type: "vppb",
+              label: "vPPB USP",
+            },
+            style: {
+              width: "180px",
+              height: "60px",
+              backgroundColor: "#ACA9F1",
+              border: "none",
+              borderRadius: "8px",
+              boxShadow: "5px 5px 1px #565478",
+            },
+            parentId: "vppb",
+            extend: "parent",
+          })
+        : initialNodes.push({
+            id: `vcs_${data.virtualCxlSwitchId}_vppb_${data.vppb.vppbId}_host_${data.uspId}`,
+            position: { x: (index - 1) * 200 || 0, y: 180 }, // vsc 위치에 맞추서 수정 필요
+            data: {
+              ...data,
+              type: "vppb",
+              label: `vPPB ${data.vppb.vppbId}`,
+            },
+            style: {
+              width: "180px",
+              height: "60px",
+              backgroundColor: "#ACA9F1",
+              border: "none",
+              borderRadius: "8px",
+              boxShadow: "5px 5px 1px #565478",
+            },
+            parentId: "vppb",
+            extend: "parent",
+          });
   });
+
   ppb.map((data, index) => {
     initialNodes.push({
-      id: `ppb${data.portId}`,
+      id: `ppb_${data.portId}`,
       position: { x: (index + 1) * 200 || 0, y: 40 },
       data: { ...data, type: "ppb", label: `PPB` },
       style: {
@@ -124,9 +126,10 @@ export const processInitialNodes = ({
       extend: "parent",
     });
   });
+
   device.map((data, index) => {
     initialNodes.push({
-      id: `device${data.portId}`,
+      id: `device_${data.portId}`,
       type: "output",
       position: { x: (index + 1) * 200 || 0, y: 723 },
       data: { ...data, type: "device", label: `Device ${data.portId}` },
