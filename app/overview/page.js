@@ -6,7 +6,7 @@ import { useSocket } from "../_components/providers/socket-provider";
 import { useCXLSocket } from "./_hooks/useCXLSocket";
 import { processCXLSocketData } from "./_utils/processCXLSocketData";
 import { ReactFlow, useNodesState } from "@xyflow/react";
-import { Input } from "antd";
+import { processInitialNodes } from "./_utils/processInitialNodes";
 // import Host from "./_components/Host";
 // import CXLSwitch from "./_components/CXLSwitch";
 // import LogicalDevice from "./_components/LogicalDevice";
@@ -30,11 +30,6 @@ export default function Overview() {
   const [nodes, setNodes, onNodesChange] = useNodesState();
   const [edges, setEdges, onEdgeschange] = useNodesState();
 
-  //   console.log("port: ", portData);
-  //   console.log("device: ", deviceData);
-  //   console.log("vcs: ", vcsData);
-  //   console.log("displayData: ", displayData);
-
   useEffect(() => {
     setDisplayData({
       host: host,
@@ -45,155 +40,26 @@ export default function Overview() {
   }, [portData, vcsData, deviceData]);
 
   useEffect(() => {
-    const containerWidth = window.innerWidth;
+    if (host.length && vcs.length && ppb.length && device.length) {
+      const initialNodes = [];
+      const initialEdges = [];
 
-    /* Host */
-    const boxWidth = 180;
-    const totalBoxWidth = host.length * boxWidth;
-    const remainingSpace = containerWidth - totalBoxWidth;
-    const gap = remainingSpace / (host.length + 1);
-
-    /* VCS */
-    const vcsBoxWidth = containerWidth * 0.95;
-    const startVCSBox = (containerWidth - vcsBoxWidth) / 2;
-
-    const initialNodes = [];
-    const initialEdges = [];
-
-    if (host && vcs && device) {
-      const vcsGroup = {
-        id: "vcs",
-        type: "group",
-        position: { x: startVCSBox, y: 143 },
-        style: {
-          width: "95%",
-          height: "55%",
-          backgroundColor: "#0c1320", //D1F05C
-          border: "2px solid #D1F05C",
-          borderRadius: 53,
-        },
-      };
-
-      // Host 개수별로 생겨야함
-      const vppbGroup = {
-        id: "vppb",
-        type: "group",
-        position: { x: 0, y: 40 },
-        style: { width: "30%", height: "20%" },
-        parentId: "vcs",
-        extend: "parent",
-      };
-
-      // Host 개수별로 생겨야함
-      const ppbGroup = {
-        id: "ppb",
-        type: "group",
-        position: { x: 0, y: 360 },
-        style: { width: "20%", height: "10%" },
-        parentId: "vcs",
-        extend: "parent",
-      };
-      initialNodes.push(vcsGroup, vppbGroup, ppbGroup);
-
-      host.map((data, index) => {
-        initialNodes.push({
-          id: `host${data.portId}`,
-          position: { x: gap + index * (boxWidth + gap), y: 43 },
-          data: { ...data, type: "host", label: `Host ${data.portId}` },
-          type: "input",
-          style: {
-            width: "180px",
-            height: "60px",
-            backgroundColor: "#5452F6",
-            border: "none",
-            borderRadius: "8px",
-            boxShadow: "5px 5px 1px #30328B",
-          }, // FF5A43
-        });
+      const containerWidth = window.innerWidth;
+      const nodes = processInitialNodes({
+        host,
+        vcs,
+        ppb,
+        device,
+        containerWidth,
+        initialNodes,
       });
-      vcs.map((data, index) => {
-        data.hostPort
-          ? initialNodes.push({
-              id: `host${data.uspId}_vppb${data.vppb.vppbId}`,
-              position: { x: gap + index * (boxWidth + gap), y: 40 },
-              data: {
-                ...data,
-                type: "vppb",
-                label: "vPPB USP",
-              },
-              style: {
-                width: "180px",
-                height: "60px",
-                backgroundColor: "#ACA9F1",
-                border: "none",
-                borderRadius: "8px",
-                boxShadow: "5px 5px 1px #565478",
-              },
-              parentId: "vppb",
-              extend: "parent",
-            })
-          : initialNodes.push({
-              id: `host${data.uspId}_vppb${data.vppb.vppbId}`,
-              position: { x: (index - 1) * 200, y: 180 }, // vsc 위치에 맞추서 수정 필요
-              data: {
-                ...data,
-                type: "vppb",
-                label: `vPPB ${data.vppb.vppbId}`,
-              },
-              style: {
-                width: "180px",
-                height: "60px",
-                backgroundColor: "#ACA9F1",
-                border: "none",
-                borderRadius: "8px",
-                boxShadow: "5px 5px 1px #565478",
-              },
-              parentId: "vppb",
-              extend: "parent",
-            });
-      });
-      ppb.map((data, index) => {
-        initialNodes.push({
-          id: `ppb${data.portId}`,
-          position: { x: (index + 1) * 200, y: 40 },
-          data: { ...data, type: "ppb", label: `PPB` },
-          style: {
-            width: "180px",
-            height: "60px",
-            backgroundColor: "#ACA9F1",
-            border: "none",
-            borderRadius: "8px",
-            boxShadow: "5px 5px 1px #565478",
-          },
-          parentId: "ppb",
-          extend: "parent",
-        });
-      });
-      device.map((data, index) => {
-        initialNodes.push({
-          id: `device${data.portId}`,
-          type: "output",
-          position: { x: (index + 1) * 200, y: 723 },
-          data: { ...data, type: "device", label: `Device ${data.portId}` },
-          style: {
-            width: "180px",
-            height: "60px",
-            backgroundColor: "#BADCF9",
-            border: "none",
-            borderRadius: "8px",
-            boxShadow: "5px 5px 1px #63778D",
-          },
-        });
-      });
-      // console.log("nodes: ", initialNodes);
+
+      setNodes(nodes);
     }
-
-    setNodes(initialNodes);
-    setEdges(initialEdges);
-  }, [portData, vcsData, deviceData]);
+  }, [portData, deviceData, vcsData]);
 
   return (
-    <div className="w-screen h-screen bg-gray-200 flex flex-col gap-28 justify-center items-center bg-[#0c1320]">
+    <div className="w-screen h-screen bg-gray-200 flex flex-col gap-28 justify-center items-center !bg-[#0c1320]">
       <ReactFlow
         nodes={nodes}
         edges={edges}
