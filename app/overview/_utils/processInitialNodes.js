@@ -23,7 +23,7 @@ export const processInitialNodes = ({
     style: {
       width: "95%",
       height: "55%",
-      backgroundColor: "#0c1320", //D1F05C
+      backgroundColor: "#0c132000", //D1F05C
       border: "2px solid #D1F05C",
       borderRadius: 53,
     },
@@ -69,7 +69,7 @@ export const processInitialNodes = ({
   vcs.map((data, index) => {
     data.hostPort
       ? initialNodes.push({
-          id: `host${data.uspId}_vppb${data.vppb.vppbId}`,
+          id: `host${data.uspId}_vppbForUSP`,
           position: { x: gap + index * (boxWidth + gap) || 0, y: 40 },
           data: {
             ...data,
