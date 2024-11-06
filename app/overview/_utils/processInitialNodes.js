@@ -3,146 +3,281 @@ export const processInitialNodes = ({
   vcs,
   ppb,
   device,
-  containerWidth,
   initialNodes,
 }) => {
-  /* Host */
-  const boxWidth = 180;
-  const totalBoxWidth = host.length * boxWidth;
-  const remainingSpace = containerWidth - totalBoxWidth;
-  const gap = remainingSpace / (host.length + 1);
+  const vPPBForHOST = [];
+  const vPPBForPPB = [];
+  vcs.map((data) => {
+    data.hostPort ? vPPBForHOST.push(data) : vPPBForPPB.push(data);
+  });
 
-  /* VCS */
-  const vcsBoxWidth = containerWidth * 0.95;
-  const startVCSBox = (containerWidth - vcsBoxWidth) / 2;
+  const nodeBox = {
+    width: 114,
+    height: 56,
+    borderRadius: 8,
+  };
 
+  const gap = {
+    row: 24,
+    column: 20,
+  };
+
+  const padding = {
+    vPPB: 20,
+    PPB: 38,
+  };
+
+  const COLOR = ["#2097F6", "#65BF73"];
+  host.map((data, index) => {
+    data.backgroundColor = COLOR[index];
+  });
+
+  const eachHostvPPBlength = [];
+  host.map((data) => {
+    eachHostvPPBlength.push(
+      vPPBForPPB.filter((info) => data.portId === info.uspId).length
+    );
+  });
+  const vcsWidth = eachHostvPPBlength.map((data) => {
+    return data * nodeBox.width + gap.row * (data - 1) + padding.vPPB * 2;
+  });
+
+  const groupBox = {
+    vcsWidth: vcsWidth,
+    ppbWidth:
+      ppb.length * nodeBox.width + gap.row * (ppb.length - 1) + padding.PPB * 2,
+    switchWidth:
+      ppb.length * nodeBox.width +
+      gap.row * (ppb.length - 1) +
+      padding.PPB +
+      2 * padding.PPB,
+    largeRadius: 53,
+    smallRadius: 32,
+  };
+
+  /* VCS Group*/
   const vcsGroup = {
     id: "vcs",
     type: "group",
-    position: { x: startVCSBox, y: 143 },
-    style: {
-      width: "95%",
-      height: "55%",
-      backgroundColor: "#0c132000", //D1F05C
-      border: "2px solid #D1F05C",
-      borderRadius: 53,
+    position: {
+      x: 1920 - groupBox.switchWidth - (1920 - groupBox.switchWidth) / 2,
+      y: 195,
     },
+    style: {
+      width: `${groupBox.switchWidth}px`,
+      height: "368px",
+      backgroundColor: "#34362C",
+      borderRadius: groupBox.largeRadius,
+      zIndex: -2,
+    },
+    selectable: false,
   };
 
-  // Host 개수별로 생겨야함
-  const vppbGroup = {
-    id: "vppb",
-    type: "group",
-    position: { x: 0, y: 40 },
-    style: { width: "30%", height: "20%" },
-    parentId: "vcs",
-    extend: "parent",
-  };
-
-  const ppbGroup = {
-    id: "ppb",
-    type: "group",
-    position: { x: 0, y: 360 },
-    style: { width: "20%", height: "10%" },
-    parentId: "vcs",
-    extend: "parent",
-  };
-  initialNodes.push(vcsGroup, vppbGroup, ppbGroup);
-
+  /* vPPB Group */
+  const vppbGroup = [];
   host.map((data, index) => {
-    initialNodes.push({
-      id: `host_${data.portId}`,
-      position: { x: gap + index * (boxWidth + gap) || 0, y: 43 },
-      data: { ...data, type: "host", label: `Host ${data.portId}` },
-      type: "input",
+    vppbGroup.push({
+      id: `vppb__host_${data.portId}`,
+      type: "default",
+      position: { x: 20 * (index + 1) + index * vcsWidth[index], y: 20 },
+      data: { label: `VCS${index}` },
       style: {
-        width: "180px",
-        height: "60px",
-        backgroundColor: "#5452F6",
-        border: "none",
-        borderRadius: "8px",
-        boxShadow: "5px 5px 1px #30328B",
-      }, // FF5A43
+        width: `${vcsWidth[index]}px`,
+        height: "212px",
+        border: "white",
+        borderRadius: 32,
+        backgroundColor: "#0C1320",
+        color: "white",
+        zIndex: -1,
+        display: "flex",
+        justifyContent: "flex-start",
+        alignItems: "start",
+        padding: "20px",
+        fontSize: "14px",
+        color: "#4C4C4C",
+      },
+      parentId: "vcs",
+      extend: "parent",
+      selectable: false,
     });
   });
 
-  vcs.map((data, index) => {
-    console.log("data: ", data),
-      data.hostPort
-        ? initialNodes.push({
-            id: `USP_vppb_host_${data.uspId}`,
-            position: { x: gap + index * (boxWidth + gap) || 0, y: 40 },
-            data: {
-              ...data,
-              type: "vppb",
-              label: "vPPB USP",
-            },
-            style: {
-              width: "180px",
-              height: "60px",
-              backgroundColor: "#ACA9F1",
-              border: "none",
-              borderRadius: "8px",
-              boxShadow: "5px 5px 1px #565478",
-            },
-            parentId: "vppb",
-            extend: "parent",
-          })
-        : initialNodes.push({
-            id: `vcs_${data.virtualCxlSwitchId}_vppb_${data.vppb.vppbId}_host_${data.uspId}`,
-            position: { x: (index - 1) * 200 || 0, y: 180 }, // vsc 위치에 맞추서 수정 필요
-            data: {
-              ...data,
-              type: "vppb",
-              label: `vPPB ${data.vppb.vppbId}`,
-            },
-            style: {
-              width: "180px",
-              height: "60px",
-              backgroundColor: "#ACA9F1",
-              border: "none",
-              borderRadius: "8px",
-              boxShadow: "5px 5px 1px #565478",
-            },
-            parentId: "vppb",
-            extend: "parent",
-          });
+  /* ppbGroup */
+  const ppbGroup = {
+    id: "ppb",
+    type: "group",
+    position: { x: gap.row, y: 252 },
+    style: {
+      width: `${groupBox.ppbWidth}px`,
+      height: "96px",
+      border: "none",
+      backgroundColor: "#613F00",
+      borderRadius: groupBox.smallRadius,
+      zIndex: -1,
+    },
+    parentId: "vcs",
+    extend: "parent",
+    selectable: false,
+  };
+  initialNodes.push(vcsGroup, ...vppbGroup, ppbGroup);
+
+  /* Host */
+  host.map((data, index) => {
+    initialNodes.push({
+      id: `host_${data.portId}`,
+      position: {
+        x:
+          groupBox.vcsWidth[index] -
+            nodeBox.width -
+            (groupBox.vcsWidth[index] - nodeBox.width) / 2 || 0,
+        y: -96,
+      },
+      data: { ...data, type: "host", label: `Host ${data.portId}` },
+      type: "input",
+      style: {
+        width: `${nodeBox.width}px`,
+        height: `${nodeBox.height}px`,
+        backgroundColor: `${data.backgroundColor}`,
+        border: "none",
+        borderRadius: "8px",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        fontSize: "20px",
+        fontWeight: "600",
+        color: "white",
+      },
+      parentId: `vppb__host_${data.portId}`,
+      extend: "parent",
+    });
   });
 
+  /* vPPB For Host*/
+  vPPBForHOST.map((data, index) => {
+    initialNodes.push({
+      id: `USP_vppb_host_${data.uspId}`,
+      position: {
+        x:
+          groupBox.vcsWidth[index] -
+            nodeBox.width -
+            (groupBox.vcsWidth[index] - nodeBox.width) / 2 || 0,
+        y: 20,
+      },
+      data: {
+        ...data,
+        type: "vppb",
+        label: "vPPB",
+      },
+      style: {
+        width: `${nodeBox.width}px`,
+        height: `${nodeBox.height}px`,
+        backgroundColor: "#0c1320",
+        border: "2px solid #ACA9F1",
+        borderRadius: nodeBox.borderRadius,
+        color: "#ACA9F1",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        fontSize: "20px",
+      },
+      parentId: `vppb__host_${data.uspId}`,
+      extend: "parent",
+    });
+  });
+
+  /* vPPB For PPB*/
+  let currentId = null;
+  let index = 0;
+  vPPBForPPB.map((data) => {
+    if (currentId !== data.uspId) {
+      currentId = data.uspId;
+      index = 0;
+    }
+    initialNodes.push({
+      id: `vcs_${data.virtualCxlSwitchId}_vppb_${data.vppb.vppbId}_host_${data.uspId}`,
+      position: {
+        x: padding.vPPB + index * (nodeBox.width + gap.row) || 0,
+        y: 136,
+      },
+      data: {
+        ...data,
+        type: "vppb",
+        label: `vPPB ${data.vppb.vppbId}`,
+      },
+      style: {
+        width: `${nodeBox.width}px`,
+        height: `${nodeBox.height}px`,
+        backgroundColor: "#0c1320",
+        border: "2px solid #ACA9F1",
+        borderRadius: nodeBox.borderRadius,
+        color: "#ACA9F1",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        fontSize: "20px",
+      },
+      parentId: `vppb__host_${data.uspId}`,
+      extend: "parent",
+    });
+    index++;
+  });
+
+  /* PPB */
   ppb.map((data, index) => {
     initialNodes.push({
       id: `ppb_${data.portId}`,
-      position: { x: (index + 1) * 200 || 0, y: 40 },
-      data: { ...data, type: "ppb", label: `PPB` },
+      position: {
+        x: padding.PPB + index * (nodeBox.width + gap.row) || 0,
+        y: 20,
+      },
+      data: { ...data, type: "ppb", label: `PPB ${data.portId}` },
       style: {
-        width: "180px",
-        height: "60px",
-        backgroundColor: "#ACA9F1",
-        border: "none",
-        borderRadius: "8px",
-        boxShadow: "5px 5px 1px #565478",
+        width: `${nodeBox.width}px`,
+        height: `${nodeBox.height}px`,
+        backgroundColor: "#613F00",
+        border: "2px solid #ACA9F1",
+        borderRadius: nodeBox.borderRadius,
+        color: "#ACA9F1",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        fontSize: "20px",
       },
       parentId: "ppb",
       extend: "parent",
     });
   });
 
+  /* Device */
   device.map((data, index) => {
     initialNodes.push({
       id: `device_${data.portId}`,
       type: "output",
-      position: { x: (index + 1) * 200 || 0, y: 723 },
-      data: { ...data, type: "device", label: `Device ${data.portId}` },
+      position: {
+        x: padding.PPB + index * (nodeBox.width + gap.row) || 0,
+        y: 136,
+      },
+      data: { ...data, type: "device", label: `Device ${data.portId}` }, // SLD 또는 MLD 구분 해야함.
       style: {
-        width: "180px",
-        height: "60px",
-        backgroundColor: "#EEEEFF",
+        width: `${nodeBox.width}px`,
+        height: `${nodeBox.height}px`,
+        backgroundColor: `${
+          host.find((info) => data.hostId === info.portId)?.backgroundColor ||
+          "#EEEEFF"
+        }`,
         border: "none",
         borderRadius: "8px",
-        boxShadow: "5px 5px 1px #ACA9F1",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        fontSize: "20px",
       },
+      parentId: "ppb",
+      extend: "parent",
     });
   });
+
+  console.log("init: ", initialNodes);
 
   return initialNodes;
 };

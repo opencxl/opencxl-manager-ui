@@ -63,7 +63,7 @@ export const processInitialEdges = ({ nodes, initialEdges }) => {
           target: info,
           zIndex: 1,
           style: { stroke: "#FF5A43", strokeWidth: 2 },
-          type: "smoothstep",
+          type: "default",
         });
       });
     }
@@ -73,7 +73,7 @@ export const processInitialEdges = ({ nodes, initialEdges }) => {
       target: data.target,
       zIndex: 1,
       style: { stroke: "#FF5A43", strokeWidth: 2 },
-      type: "smoothstep",
+      type: "default",
     });
   });
 
