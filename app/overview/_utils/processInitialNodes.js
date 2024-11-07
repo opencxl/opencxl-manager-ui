@@ -124,7 +124,7 @@ export const processInitialNodes = ({
   /* Host */
   host.map((data, index) => {
     initialNodes.push({
-      id: `host_${data.portId}`,
+      id: `type_host_usp_${data.portId}_vcs_X_vppb_X_ppb_X_device_X_ld_X`, // id 변경
       position: {
         x:
           groupBox.vcsWidth[index] -
@@ -155,7 +155,7 @@ export const processInitialNodes = ({
   /* vPPB For Host*/
   vPPBForHOST.map((data, index) => {
     initialNodes.push({
-      id: `USP_vppb_host_${data.uspId}`,
+      id: `type_vppbForHost_usp_${data.uspId}_vcs_X_vppb_X_ppb_X_device_X_ld_X`, // id 변경
       position: {
         x:
           groupBox.vcsWidth[index] -
@@ -194,7 +194,7 @@ export const processInitialNodes = ({
       index = 0;
     }
     initialNodes.push({
-      id: `vcs_${data.virtualCxlSwitchId}_vppb_${data.vppb.vppbId}_host_${data.uspId}`,
+      id: `type_vppbForPPB_usp_${data.uspId}_vcs_${data.virtualCxlSwitchId}_vppb_${data.vppb.vppbId}_ppb_X_device_X_ld_X`, // id 변경
       position: {
         x: padding.vPPB + index * (nodeBox.width + gap.row) || 0,
         y: 136,
@@ -225,7 +225,7 @@ export const processInitialNodes = ({
   /* PPB */
   ppb.map((data, index) => {
     initialNodes.push({
-      id: `ppb_${data.portId}`,
+      id: `type_ppb_usp_X_vcs_X_vppb_X_ppb_${data.portId}_device_sld_ld_X`, // id 변경
       position: {
         x: padding.PPB + index * (nodeBox.width + gap.row) || 0,
         y: 20,
@@ -251,7 +251,7 @@ export const processInitialNodes = ({
   /* Device */
   device.map((data, index) => {
     initialNodes.push({
-      id: `device_${data.portId}`,
+      id: `type_device_usp_X_vcs_X_vppb_X_ppb_${data.portId}_device_sld_ld_X`, // id 변경
       type: "output",
       position: {
         x: padding.PPB + index * (nodeBox.width + gap.row) || 0,
@@ -276,8 +276,6 @@ export const processInitialNodes = ({
       extend: "parent",
     });
   });
-
-  console.log("init: ", initialNodes);
 
   return initialNodes;
 };
