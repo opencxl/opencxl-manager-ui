@@ -19,19 +19,16 @@ export default function Overview() {
   });
   const [displayData, setDisplayData] = useState({
     host: [],
-    // vppb로 이름 바꾸기
     vcs: [],
     device: [] /* SLD, MLD 구분이 가능해지면 추후 관련된 데이터 추가 필요 */,
     ppb: [],
   });
-  // const [eventStatus, setEventStatus] = useState({
-  //   sourceId: null,
-  //   targetId: null,
-  //   nodeId: null,
-  //   tempSourceId: null,
-  //   tempTargetId: null,
-  // });
-
+  const [eventData, setEventData] = useState({
+    virtualCxlSwitchId: null,
+    vppbId: null,
+    physicalPortId: null,
+    ld: null,
+  });
   const [nodes, setNodes, onNodesChange] = useNodesState();
   const [edges, setEdges, onEdgeschange] = useNodesState();
 
@@ -47,20 +44,17 @@ export default function Overview() {
   useEffect(() => {
     if (host.length && vcs.length && ppb.length && device.length) {
       const initialNodes = [];
-      // const containerWidth = window.innerWidth;
       processInitialNodes({
         host,
         vcs,
         ppb,
         device,
-        // containerWidth,
         initialNodes,
-        // eventStatus,
       });
 
       setNodes(initialNodes);
     }
-  }, [portData, deviceData, vcsData]);
+  }, [portData, deviceData, vcsData, socket]);
 
   useEffect(() => {
     const initialEdges = [];
@@ -73,7 +67,72 @@ export default function Overview() {
 
   const handleNode = (e) => {
     const id = e.currentTarget.dataset.id;
-    console.log("id: ", id);
+    const parts = id.split("_");
+    const result = {
+      [parts[0]]: parts[1],
+      [parts[2]]: parts[3],
+      [parts[4]]: parts[5],
+      [parts[6]]: parts[7],
+      [parts[8]]: parts[9],
+      [parts[10]]: parts[11],
+      [parts[12]]: parts[13],
+    };
+    if (!result.vppb) {
+      return;
+    }
+
+    if (!result.type === "vppbForPPB" || !result.type === "ppb") {
+      console.log("This function is not supported");
+      return;
+    }
+    if (result.type === "vppbForPPB") {
+      const newVirtualCxlSwitchId = result["vcs"];
+      const newVppbId = result["vppb"];
+
+      setEventData((prev) => ({
+        ...prev,
+        virtualCxlSwitchId: result["vcs"],
+        vppbId: result["vppb"],
+      }));
+      console.log("vcs: ", newVirtualCxlSwitchId);
+      console.log("vppbId: ", newVppbId);
+      socket.emit(
+        "vcs:unbind",
+        {
+          virtualCxlSwitchId: newVirtualCxlSwitchId,
+          vppbId: newVppbId,
+        },
+        (args) => {
+          if (args.error) {
+            setOpen({
+              ...open,
+              loading: false,
+            });
+            showError(args.error, vppb);
+            return;
+          }
+          console.log("args: ", args);
+          setEventData((prev) => ({
+            ...prev,
+            virtualCxlSwitchId: null,
+            vppbId: null,
+          }));
+          // handleClose();
+          // handleRefresh();
+        }
+      );
+    }
+    // else if (result.type === "ppb") {
+    //   if (!eventData.virtualCxlSwitchId || !eventData.vppbId) {
+    //     return;
+    //   }
+    //   setEventData((prev) => ({
+    //     ...prev,
+    //     physicalPortId: result["ppb"],
+    //   }));
+    //   // 모달 띄우기
+
+    // }
 
     //     socket.emit('vcs:unbind', {
     //       virtualCxlSwitchId: vcs.virtualCxlSwitchId,
