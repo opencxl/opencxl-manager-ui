@@ -1,0 +1,14 @@
+.vppb_node:hover {
+  background-color: #aca9f1 !important;
+  color: #ffffff !important;
+}
+
+.vcs_group div {
+  display: none !important;
+}
+
+.react-flow__handle {
+  background-color: #ff5a43 !important;
+  border: 5px solid #ff5a43 !important;
+  cursor: default !important;
+}

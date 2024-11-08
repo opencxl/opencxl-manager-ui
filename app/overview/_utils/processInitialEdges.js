@@ -64,6 +64,7 @@ export const processInitialEdges = ({ nodes, initialEdges }) => {
           zIndex: 1,
           style: { stroke: "#FF5A43", strokeWidth: 2 },
           type: "default",
+          selectable: false,
         });
       });
     }
@@ -74,6 +75,7 @@ export const processInitialEdges = ({ nodes, initialEdges }) => {
       zIndex: 1,
       style: { stroke: "#FF5A43", strokeWidth: 2 },
       type: "default",
+      selectable: false,
     });
   });
 
