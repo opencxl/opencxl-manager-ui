@@ -7,7 +7,11 @@ export const processCXLSocketData = ({ portData, vcsData }) => {
   portData.forEach((port) => {
     if (port.currentPortConfigurationState === "USP") {
       if (port.ltssmState === "L0") {
-        host.push({ portType: "USP", portId: port.portId });
+        host.push({
+          portType: "USP",
+          portId: port.portId,
+          backgroundColor: null,
+        });
         vcs.push({
           uspId: port.portId,
           hostPort: true,
@@ -26,12 +30,13 @@ export const processCXLSocketData = ({ portData, vcsData }) => {
         device.push({
           portType: "DSP",
           portId: port.portId,
-          boundVPPBId: null,
+          boundVPPBId: [],
         });
         ppb.push({
           portType: "DSP",
           portId: port.portId,
-          boundVPPBId: null,
+          boundVPPBId: [],
+          type: "SLD", // MLD, SLD를 넣는다.
         });
       } else {
         device.push(null);
@@ -41,7 +46,7 @@ export const processCXLSocketData = ({ portData, vcsData }) => {
   });
 
   vcsData.forEach((data) => {
-    data.ppb_info_list.forEach((vppb) => {
+    data.vppbs.forEach((vppb) => {
       if (vppb.bindingStatus === "UNBOUND") {
         vcs.push({
           virtualCxlSwitchId: data.virtualCxlSwitchId,
@@ -54,13 +59,19 @@ export const processCXLSocketData = ({ portData, vcsData }) => {
           uspId: data.uspId,
           vppb: vppb,
         });
+        ppb.map((info) => {
+          if (info?.portId === vppb.boundPortId) {
+            info.boundVPPBId.push(vppb.vppbId);
+          }
+        });
+        // ppb.portId와 vppb.bounPortId가 같은게 있다면, ppb.boundVPPBId에 push 해야한다.
       }
     });
   });
 
   device.forEach((deviceInfo) => {
     const boundVppb = vcs.find(
-      (vcsInfo) => deviceInfo.portId === vcsInfo.vppb.boundPortId
+      (vcsInfo) => deviceInfo?.portId === vcsInfo.vppb.boundPortId
     );
     if (boundVppb && boundVppb.vppb) {
       deviceInfo.boundVPPBId = boundVppb.vppb.vppbId;

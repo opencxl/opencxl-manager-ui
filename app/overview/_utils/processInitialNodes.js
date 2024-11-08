@@ -29,7 +29,7 @@ export const processInitialNodes = ({
 
   const COLOR = ["#2097F6", "#65BF73"];
   host.map((data, index) => {
-    data.backgroundColor = COLOR[index];
+    data.backgroundColor = COLOR[index] || "#EEEEFF";
   });
 
   const eachHostvPPBlength = [];
@@ -57,7 +57,7 @@ export const processInitialNodes = ({
 
   /* VCS Group*/
   const vcsGroup = {
-    id: "vcs",
+    id: "group_vcs",
     type: "group",
     position: {
       x: 1920 - groupBox.switchWidth - (1920 - groupBox.switchWidth) / 2,
@@ -77,7 +77,7 @@ export const processInitialNodes = ({
   const vppbGroup = [];
   host.map((data, index) => {
     vppbGroup.push({
-      id: `vppb__host_${data.portId}`,
+      id: `group_vppb_${data.portId}`,
       type: "default",
       position: { x: 20 * (index + 1) + index * vcsWidth[index], y: 20 },
       data: { label: `VCS${index}` },
@@ -96,7 +96,7 @@ export const processInitialNodes = ({
         fontSize: "14px",
         color: "#4C4C4C",
       },
-      parentId: "vcs",
+      parentId: "group_vcs",
       extend: "parent",
       selectable: false,
     });
@@ -104,7 +104,7 @@ export const processInitialNodes = ({
 
   /* ppbGroup */
   const ppbGroup = {
-    id: "ppb",
+    id: "group_ppb",
     type: "group",
     position: { x: gap.row, y: 252 },
     style: {
@@ -115,7 +115,7 @@ export const processInitialNodes = ({
       borderRadius: groupBox.smallRadius,
       zIndex: -1,
     },
-    parentId: "vcs",
+    parentId: "group_vcs",
     extend: "parent",
     selectable: false,
   };
@@ -124,7 +124,7 @@ export const processInitialNodes = ({
   /* Host */
   host.map((data, index) => {
     initialNodes.push({
-      id: `type_host_usp_${data.portId}_vcs_X_vppb_X_ppb_X_device_X_ld_X`, // id 변경
+      id: `host_${data.portId}`,
       position: {
         x:
           groupBox.vcsWidth[index] -
@@ -147,7 +147,7 @@ export const processInitialNodes = ({
         fontWeight: "600",
         color: "white",
       },
-      parentId: `vppb__host_${data.portId}`,
+      parentId: `group_vppb_${data.portId}`,
       extend: "parent",
     });
   });
@@ -155,7 +155,7 @@ export const processInitialNodes = ({
   /* vPPB For Host*/
   vPPBForHOST.map((data, index) => {
     initialNodes.push({
-      id: `type_vppbForHost_usp_${data.uspId}_vcs_X_vppb_X_ppb_X_device_X_ld_X`, // id 변경
+      id: `usp_${data.uspId}`,
       position: {
         x:
           groupBox.vcsWidth[index] -
@@ -180,7 +180,7 @@ export const processInitialNodes = ({
         alignItems: "center",
         fontSize: "20px",
       },
-      parentId: `vppb__host_${data.uspId}`,
+      parentId: `group_vppb_${data.uspId}`,
       extend: "parent",
     });
   });
@@ -194,7 +194,7 @@ export const processInitialNodes = ({
       index = 0;
     }
     initialNodes.push({
-      id: `type_vppbForPPB_usp_${data.uspId}_vcs_${data.virtualCxlSwitchId}_vppb_${data.vppb.vppbId}_ppb_X_device_X_ld_X`, // id 변경
+      id: `vppb_usp_${data.uspId}_vcs_${data.virtualCxlSwitchId}_vppb_${data.vppb.vppbId}`,
       position: {
         x: padding.vPPB + index * (nodeBox.width + gap.row) || 0,
         y: 136,
@@ -216,7 +216,7 @@ export const processInitialNodes = ({
         alignItems: "center",
         fontSize: "20px",
       },
-      parentId: `vppb__host_${data.uspId}`,
+      parentId: `group_vppb_${data.uspId}`,
       extend: "parent",
     });
     index++;
@@ -225,7 +225,7 @@ export const processInitialNodes = ({
   /* PPB */
   ppb.map((data, index) => {
     initialNodes.push({
-      id: `type_ppb_usp_X_vcs_X_vppb_X_ppb_${data.portId}_device_sld_ld_X`, // id 변경
+      id: `ppb_${data.portId}`,
       position: {
         x: padding.PPB + index * (nodeBox.width + gap.row) || 0,
         y: 20,
@@ -243,7 +243,7 @@ export const processInitialNodes = ({
         alignItems: "center",
         fontSize: "20px",
       },
-      parentId: "ppb",
+      parentId: "group_ppb",
       extend: "parent",
     });
   });
@@ -251,7 +251,7 @@ export const processInitialNodes = ({
   /* Device */
   device.map((data, index) => {
     initialNodes.push({
-      id: `type_device_usp_X_vcs_X_vppb_X_ppb_${data.portId}_device_sld_ld_X`, // id 변경
+      id: `device_${data.portId}`,
       type: "output",
       position: {
         x: padding.PPB + index * (nodeBox.width + gap.row) || 0,
@@ -272,7 +272,7 @@ export const processInitialNodes = ({
         alignItems: "center",
         fontSize: "20px",
       },
-      parentId: "ppb",
+      parentId: "group_ppb",
       extend: "parent",
     });
   });
