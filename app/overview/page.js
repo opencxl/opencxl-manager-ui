@@ -9,10 +9,15 @@ import { processCXLSocketData } from "./_utils/processCXLSocketData";
 import { ReactFlow, useNodesState } from "@xyflow/react";
 import { processInitialNodes } from "./_utils/processInitialNodes";
 import { processInitialEdges } from "./_utils/processInitialEdges";
+import Dialog from "./_components/Dialog/Dialog";
 
 // 완성 후에 RootLayout 은 따로 두고, 이 페이지는 page로 옮기자
 export default function Overview() {
   const { socket } = useSocket();
+  const [isDialogOpen, setDialogOpen] = useState(false);
+  const openDialog = () => setDialogOpen(true);
+  const closeDialog = () => setDialogOpen(false);
+
   const { portData, deviceData, vcsData } = useCXLSocket(socket);
   const { host, vcs, device, ppb } = processCXLSocketData({
     portData,
@@ -99,57 +104,72 @@ export default function Overview() {
         }
       }
     } else if (node.data?.type === "ppb") {
+      if (!availableNode.vppb || !availableNode.ppb) {
+        return;
+      }
       if (
         node.data.boundVPPBId.some(
           (data) => data === availableNode?.vppb?.vppb.vppbId
         )
       ) {
-        socket.emit(
-          "vcs:unbind",
-          {
-            virtualCxlSwitchId: Number(availableNode.vcs),
-            vppbId: Number(availableNode.vppb.vppb.vppbId),
-          },
-          (args) => {
-            if (args.error) {
-              setOpen({
-                ...open,
-                loading: false,
-              });
-              showError(args.error, vppb);
-              return;
-            }
-            setAvailableNode({ vcs: null, vppb: null, ppb: [] });
-          }
-        );
+        setSocketEventData({
+          virtualCxlSwitchId: Number(availableNode.vcs),
+          vppbId: Number(availableNode.vppb.vppb.vppbId),
+        });
+        openDialog();
       } else {
-        socket.emit(
-          "vcs:bind",
-          {
-            virtualCxlSwitchId: Number(availableNode.vcs),
-            vppbId: Number(availableNode.vppb.vppb.vppbId),
-            physicalPortId: Number(node.data.portId),
-          },
-          (args) => {
-            if (args.error) {
-              setOpen({
-                ...open,
-                loading: false,
-              });
-              showError(args.error, vppb);
-              return;
-            }
-            setAvailableNode({ vcs: null, vppb: null, ppb: [] });
-          }
-        );
+        setSocketEventData({
+          virtualCxlSwitchId: Number(availableNode.vcs),
+          vppbId: Number(availableNode.vppb?.vppb.vppbId),
+          physicalPortId: Number(node.data.portId),
+        });
+        openDialog();
       }
-      // setSocketEventData({
-      //   virtualCxlSwitchId: availableNode.vcs,
-      //   vppbId: availableNode.vppbId,
-      //   physicalPortId: node.portId,
-      // });
-      // openModal
     }
+  };
+
+  const handleSocketEvent = () => {
+    if (!socketEventData.physicalPortId) {
+      socket.emit(
+        "vcs:unbind",
+        {
+          virtualCxlSwitchId: socketEventData.virtualCxlSwitchId,
+          vppbId: socketEventData.vppbId,
+        },
+        (args) => {
+          if (args.error) {
+            setOpen({
+              ...open,
+              loading: false,
+            });
+            showError(args.error, vppb);
+            return;
+          }
+          setAvailableNode({ vcs: null, vppb: null, ppb: [] });
+        }
+      );
+    } else {
+      socket.emit(
+        "vcs:bind",
+        {
+          virtualCxlSwitchId: socketEventData.virtualCxlSwitchId,
+          vppbId: socketEventData.vppbId,
+          physicalPortId: socketEventData.physicalPortId,
+        },
+        (args) => {
+          if (args.error) {
+            setOpen({
+              ...open,
+              loading: false,
+            });
+            showError(args.error, vppb);
+            return;
+          }
+          setAvailableNode({ vcs: null, vppb: null, ppb: [] });
+        }
+      );
+    }
+    closeDialog();
   };
 
   return (
@@ -164,6 +184,29 @@ export default function Overview() {
         onNodeClick={handleClickNode}
         deleteKeyCode={null}
       />
+      <Dialog isOpen={isDialogOpen}>
+        <h1 className="text-xl font-semibold">Dialog</h1>
+        <p className="text-sm">
+          Do you really want to{" "}
+          {socketEventData.physicalPortId ? "Bind" : "Unbind"}?
+        </p>
+        <div className="flex justify-end">
+          <button
+            onClick={closeDialog}
+            className="h-[48px] px-6 py-3 hover:bg-gray4"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSocketEvent}
+            className={
+              "text-regular h-[48px] rounded bg-purple px-6 py-3 text-white bg-black"
+            }
+          >
+            Confirm
+          </button>
+        </div>
+      </Dialog>
     </div>
   );
 }
