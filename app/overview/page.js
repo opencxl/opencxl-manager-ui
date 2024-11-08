@@ -73,130 +73,83 @@ export default function Overview() {
     setEdges(initialEdges);
   }, [nodes]);
 
-  const handleClickNode = (node) => {
-    console.log("node: ", node.data);
-    if (node.data.type === "vppb") {
+  const handleClickNode = (_, node) => {
+    if (node.data?.type === "vppb") {
       if (availableNode.vppb) {
         setAvailableNode({ vcs: null, vppb: null, ppb: [] });
       } else {
-        const availablePPB = ppb.filter(
-          (data) => data.boundVPPBId.length === 0
+        if (node.data.vppb.boundPortId) {
+          const availablePPB = ppb.find(
+            (data) => (data.portId = node.data.vppb.boundPortId)
+          );
+          setAvailableNode({
+            vcs: node.data.virtualCxlSwitchId,
+            vppb: node.data,
+            ppb: [availablePPB],
+          });
+        } else {
+          const availablePPB = ppb.filter(
+            (data) => data.boundVPPBId.length === 0
+          );
+          setAvailableNode({
+            vcs: node.data.virtualCxlSwitchId,
+            vppb: node.data,
+            ppb: [...availablePPB],
+          });
+        }
+      }
+    } else if (node.data?.type === "ppb") {
+      if (
+        node.data.boundVPPBId.some(
+          (data) => data === availableNode?.vppb?.vppb.vppbId
+        )
+      ) {
+        socket.emit(
+          "vcs:unbind",
+          {
+            virtualCxlSwitchId: Number(availableNode.vcs),
+            vppbId: Number(availableNode.vppb.vppb.vppbId),
+          },
+          (args) => {
+            if (args.error) {
+              setOpen({
+                ...open,
+                loading: false,
+              });
+              showError(args.error, vppb);
+              return;
+            }
+            setAvailableNode({ vcs: null, vppb: null, ppb: [] });
+          }
         );
-        setAvailableNode({
-          vcs: node.data.virtualCxlSwitchId,
-          vppb: node.data,
-          ppb: [...availablePPB],
-        });
+      } else {
+        socket.emit(
+          "vcs:bind",
+          {
+            virtualCxlSwitchId: Number(availableNode.vcs),
+            vppbId: Number(availableNode.vppb.vppb.vppbId),
+            physicalPortId: Number(node.data.portId),
+          },
+          (args) => {
+            if (args.error) {
+              setOpen({
+                ...open,
+                loading: false,
+              });
+              showError(args.error, vppb);
+              return;
+            }
+            setAvailableNode({ vcs: null, vppb: null, ppb: [] });
+          }
+        );
       }
       // setSocketEventData({
-      //   virtualCxlSwitchId: node.data.virtualCxlSwitchId,
-      //   vppbId: node.data.vppb.vppbId,
-      // })
+      //   virtualCxlSwitchId: availableNode.vcs,
+      //   vppbId: availableNode.vppbId,
+      //   physicalPortId: node.portId,
+      // });
+      // openModal
     }
-    // if (node가 vppb 일때) {
-    //   if(vppb가 ppb와 연결됨) {
-    //     unbind
-    //   } else {
-    //     연결 가능한 ppb 선택
-    //   }
-    // } else if (node가 ppb 일때) {
-    //   // SLD, MLD 처리 모두
-    //   if(ppb가 vppb와 연결됨) {
-    //     MLD 처리 로직으로 가기
-    //     LD를 클릭할 수 있음.
-    //     openDialog - 여기서 바인드하기
-    //   } else if (ppb가 vppb와 연결 안되었지만, 연결할 vppb가 선택되어 있음) {
-    //     SLD 또는 MLD bind
-    //     openDialog - 여기서 바인드하기
-    //   } else {
-    //     아무일도 이어나지 않음 // ppb가 vppb와 연결 x, 연결할 vppb도 선택 x
-    //     vppb선택해야한다는 알림? 또는 활성화x
-    //   }
-    // }
-    // if (!result.type === "vppbForPPB" || !result.type === "ppb") {
-    //   console.log("This function is not supported");
-    //   return;
-    // }
-    // if (result.type === "vppbForPPB") {
-    //   const newVirtualCxlSwitchId = result["vcs"];
-    //   const newVppbId = result["vppb"];
-
-    //   // setSocketEventData((prev) => ({
-    //   //   ...prev,
-    //   //   virtualCxlSwitchId: result["vcs"],
-    //   //   vppbId: result["vppb"],
-    //   // }));
-    //   console.log("vcs: ", typeof newVirtualCxlSwitchId);
-    //   console.log("vppbId: ", typeof Number(newVppbId));
-    //   socket.emit(
-    //     "vcs:unbind",
-    //     {
-    //       virtualCxlSwitchId: Number(newVirtualCxlSwitchId),
-    //       vppbId: Number(newVppbId),
-    //     },
-    //     (args) => {
-    //       if (args.error) {
-    //         setOpen({
-    //           ...open,
-    //           loading: false,
-    //         });
-    //         showError(args.error, vppb);
-    //         return;
-    //       }
-    //       console.log("args: ", args);
-    //       setSocketEventData((prev) => ({
-    //         ...prev,
-    //         virtualCxlSwitchId: null,
-    //         vppbId: null,
-    //       }));
-    //       // handleClose();
-    //       // handleRefresh();
-    //     }
-    //   );
-    // }
-    // else if (result.type === "ppb") {
-    //   if (!socketEventData.virtualCxlSwitchId || !socketEventData.vppbId) {
-    //     return;
-    //   }
-    //   setSocketEventData((prev) => ({
-    //     ...prev,
-    //     physicalPortId: result["ppb"],
-    //   }));
-    //   // 모달 띄우기
-
-    // }
-
-    //     socket.emit('vcs:unbind', {
-    //       virtualCxlSwitchId: vcs.virtualCxlSwitchId,
-    //       vppbId: Number(vppb),
-    //   }, (args) => {
-    //       if (args.error) {
-    //           setOpen({
-    //               ...open,
-    //               loading: false,
-    //           });
-    //           showError(args.error, vppb);
-    //           return;
-    //       }
-    //       handleClose();
-    //       handleRefresh();
-    //   });
-    //   socket.emit('vcs:bind', {
-    //     virtualCxlSwitchId: vcs.virtualCxlSwitchId,
-    //     vppbId: vppb,
-    //     physicalPortId: Number(open.dsp),
-    // }, (args) => {
-    //     if (args.error) {
-    //         setOpen({
-    //             ...open,
-    //             loading: false,
-    //         });
-    //         showError(args.error, vppb);
-    //         return;
-    //     }
-    //     handleClose();
-    //     handleRefresh();
-    // });
   };
 
   return (

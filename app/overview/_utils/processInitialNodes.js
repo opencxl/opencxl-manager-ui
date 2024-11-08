@@ -57,12 +57,12 @@ export const processInitialNodes = ({
     smallRadius: 32,
   };
 
-  const defaultZIndex = 0; // 기본 값
-  const vppbZIndex = 1; // 포커스 될 때 설정
-  const ppbZIndex = 1; // 포커스 될 때 설정
-  const deviceZIndex = 1; // 포커스 될 때 설정
-  const wrapperZIndex = 1; // 포커스 되는 것과 함께 설정
-  const backgrounZIndex = 0; // 고정
+  const defaultZIndex = 0; // default value
+  const vppbZIndex = 1; // set when need to focus
+  const ppbZIndex = 1; // set when need to focus
+  const deviceZIndex = 1; // set when need to focus
+  const wrapperZIndex = 1; // set when something focus (vppbZIndex, ppbZIndex, deviceZIndex)
+  const backgrounZIndex = 0; // fixed value
 
   /* backgroud & wrapper */
   initialNodes.push({
@@ -273,7 +273,7 @@ export const processInitialNodes = ({
           (availableNode?.vcs === data.virtualCxlSwitchId)
         )
           ? defaultZIndex
-          : vppbZIndex, // defaultZIndex
+          : vppbZIndex,
         opacity: 1,
         position: "absolute",
       },
@@ -308,9 +308,18 @@ export const processInitialNodes = ({
           return info.portId === data.portId;
         })
           ? defaultZIndex
-          : ppbZIndex, // defaultZIndex
+          : ppbZIndex,
         opacity: 1,
       },
+      className: `${
+        !availableNode.ppb?.some((info) => {
+          return info.portId === data.portId;
+        })
+          ? defaultZIndex
+          : ppbZIndex
+          ? "ppb_node"
+          : ""
+      }`,
       parentId: "group_ppb",
       extend: "parent",
     });
@@ -339,7 +348,7 @@ export const processInitialNodes = ({
         justifyContent: "center",
         alignItems: "center",
         fontSize: "20px",
-        zIndex: true ? defaultZIndex : deviceZIndex, // defaultZIndex
+        zIndex: true ? defaultZIndex : deviceZIndex,
         opacity: 1,
       },
       parentId: "group_ppb",

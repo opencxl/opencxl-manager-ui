@@ -3,6 +3,11 @@
   color: #ffffff !important;
 }
 
+.ppb_node:hover {
+  background-color: #aca9f1 !important;
+  color: #ffffff !important;
+}
+
 .vcs_group div {
   display: none !important;
 }
