@@ -184,29 +184,12 @@ export default function Overview() {
         onNodeClick={handleClickNode}
         deleteKeyCode={null}
       />
-      <Dialog isOpen={isDialogOpen}>
-        <h1 className="text-xl font-semibold">Dialog</h1>
-        <p className="text-sm">
-          Do you really want to{" "}
-          {socketEventData.physicalPortId ? "Bind" : "Unbind"}?
-        </p>
-        <div className="flex justify-end">
-          <button
-            onClick={closeDialog}
-            className="h-[48px] px-6 py-3 hover:bg-gray4"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSocketEvent}
-            className={
-              "text-regular h-[48px] rounded bg-purple px-6 py-3 text-white bg-black"
-            }
-          >
-            Confirm
-          </button>
-        </div>
-      </Dialog>
+      <Dialog
+        isOpen={isDialogOpen}
+        closeDialog={closeDialog}
+        socketEventData={socketEventData}
+        handleSocketEvent={handleSocketEvent}
+      />
     </div>
   );
 }
