@@ -340,7 +340,7 @@ export const processInitialNodes = ({
         x: padding.PPB + index * (nodeBox.width + gap.row) || 0,
         y: 136,
       },
-      data: { ...data, type: "device", label: `Device ${data?.portId}` }, // SLD 또는 MLD 구분 해야함.
+      data: { ...data, type: "device", label: `SLD` }, // SLD 또는 MLD 구분 해야함.
       style: {
         width: `${nodeBox.width}px`,
         height: `${nodeBox.height}px`,
