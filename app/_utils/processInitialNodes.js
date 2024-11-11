@@ -283,6 +283,7 @@ export const processInitialNodes = ({
   });
 
   /* PPB */
+  console.log("availableNode: ", availableNode);
   ppb.map((data, index) => {
     initialNodes.push({
       id: `ppb_${data?.portId}`,
@@ -315,7 +316,9 @@ export const processInitialNodes = ({
         })
           ? defaultZIndex
           : ppbZIndex
-          ? "ppb_node"
+          ? availableNode.vppb.vppb.bindingStatus === "BOUND_LD"
+            ? "unbound_ppb_node"
+            : "bound_ppb_node"
           : ""
       }`,
       parentId: "group_ppb",
