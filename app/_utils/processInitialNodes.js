@@ -119,7 +119,12 @@ export const processInitialNodes = ({
       id: `group_vppb_${data?.portId}`,
       type: "default",
       position: {
-        x: 20 * (index + 1) + index * vcsWidth[index === 0 ? index : index - 1],
+        x:
+          index * vcsWidth[index === 0 ? index : index - 1] +
+          ((groupBox.switchWidth -
+            groupBox.vcsWidth.reduce((acc, curr) => acc + curr, 0)) /
+            (host.length + 1)) *
+            (index + 1),
         y: 20,
       },
       data: { label: `VCS${index}` },
@@ -148,7 +153,7 @@ export const processInitialNodes = ({
   const ppbGroup = {
     id: "group_ppb",
     type: "group",
-    position: { x: gap.row, y: 252 },
+    position: { x: (groupBox.switchWidth - groupBox.ppbWidth) / 2, y: 252 },
     style: {
       width: `${groupBox.ppbWidth}px`,
       height: "96px",
