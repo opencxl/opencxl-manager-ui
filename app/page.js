@@ -1,334 +1,212 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Card, Row, Col, Divider, Space } from "antd";
-import styled from "styled-components";
-import Link from "next/link";
-import { DesktopOutlined } from "@ant-design/icons";
-import { PiPlugsBold, PiPlugsConnectedBold } from "react-icons/pi";
-import { FaMemory } from "react-icons/fa6";
-import SideMenu from "./_components/navigation/SideMenu";
+import "./style.css";
+import "@xyflow/react/dist/style.css";
+import { useEffect, useState } from "react";
 import { useSocket } from "./_components/providers/socket-provider";
+import { useCXLSocket } from "./_hooks/useCXLSocket";
+import { processCXLSocketData } from "./_utils/processCXLSocketData";
+import { ReactFlow, useNodesState } from "@xyflow/react";
+import { processInitialNodes } from "./_utils/processInitialNodes";
+import { processInitialEdges } from "./_utils/processInitialEdges";
+import Dialog from "./_components/Dialog/Dialog";
 
-const BoardedCard = styled(Card)`
-  border-color: #9c9999;
-`;
-
-const ItemCard = styled(BoardedCard)`
-  text-align: center;
-  z-index: 1;
-  width: 105px;
-  word-break: break-word;
-`;
-
-const Overview = () => {
+// 완성 후에 RootLayout 은 따로 두고, 이 페이지는 page로 옮기자
+export default function Overview() {
   const { socket } = useSocket();
-  const [portData, setPortData] = useState([]);
-  const [deviceData, setDeviceData] = useState([]);
-  const [vcsData, setVCSData] = useState([]);
+  const [isDialogOpen, setDialogOpen] = useState(false);
+  const openDialog = () => setDialogOpen(true);
+  const closeDialog = () => setDialogOpen(false);
+
+  const { portData, deviceData, vcsData } = useCXLSocket(socket);
+  const { host, vcs, device, ppb } = processCXLSocketData({
+    portData,
+    vcsData,
+  });
   const [displayData, setDisplayData] = useState({
     host: [],
-    hostToUSP: [],
-    USP: [],
-    USPVCS: [],
-    DSP: [],
-    DSPToSLD: [],
-    SLD: [],
-    DSPVCS: [],
+    vcs: [],
+    device: [] /* SLD, MLD 구분이 가능해지면 추후 관련된 데이터 추가 필요 */,
+    ppb: [],
+  });
+  const [socketEventData, setSocketEventData] = useState({
+    virtualCxlSwitchId: null,
+    vppbId: null,
+    physicalPortId: null,
+    ld: null,
+  });
+  const [availableNode, setAvailableNode] = useState({
+    vcs: null,
+    vppb: null,
+    ppb: [],
   });
 
-  useEffect(() => {
-    if (!socket) return;
-    const getDeviceData = () => {
-      socket.emit("device:get", (data) => {
-        setDeviceData(data["result"]);
-      });
-    };
-    const getPortData = () => {
-      socket.emit("port:get", (data) => {
-        setPortData(data["result"]);
-      });
-    };
-    const getVCSData = () => {
-      socket.emit("vcs:get", (data) => {
-        setVCSData(data["result"]);
-      });
-    };
-    getDeviceData();
-    getPortData();
-    getVCSData();
-    socket.on("device:updated", () => getDeviceData());
-    socket.on("port:updated", () => getPortData());
-    socket.on("vcs:updated", () => getVCSData());
-    return () => {
-      socket.off("device:updated");
-      socket.off("port:updated");
-      socket.off("vcs:updated");
-    };
-  }, [socket]);
+  const [nodes, setNodes, onNodesChange] = useNodesState();
+  const [edges, setEdges, onEdgeschange] = useNodesState();
 
   useEffect(() => {
-    const host = [];
-    const hostToUSP = [];
-    const USP = [];
-    const USPVCS = [];
-    const DSP = [];
-    const DSPToSLD = [];
-    const SLD = [];
-    const DSPVCS = [];
+    setDisplayData({
+      host: host,
+      vcs: vcs,
+      device: device,
+      ppb: ppb,
+    });
+  }, [portData, vcsData, deviceData]);
 
-    portData.forEach((port) => {
-      if (port.currentPortConfigurationState === "USP") {
-        USP.push(port.portId);
-        if (port.ltssmState === "L0") {
-          host.push(port.portId);
-          hostToUSP.push(port.portId);
-        } else {
-          host.push(null);
-          hostToUSP.push(null);
-        }
-        const foundVCS = vcsData.find((vcs) => vcs.uspId === port.portId);
-        if (foundVCS) {
-          USPVCS.push(foundVCS.virtualCxlSwitchId);
-        } else {
-          USPVCS.push(null);
-        }
-      } else if (port.currentPortConfigurationState !== "DISABLED") {
-        DSP.push(port.portId);
-        if (port.ltssmState === "L0") {
-          const device = deviceData.find(
-            (device) => device.boundPortId === port.portId
+  useEffect(() => {
+    if (host.length && vcs.length && ppb.length && device.length) {
+      const initialNodes = [];
+      processInitialNodes({
+        host,
+        vcs,
+        ppb,
+        device,
+        initialNodes,
+        availableNode,
+      });
+
+      setNodes(initialNodes);
+    }
+  }, [portData, deviceData, vcsData, socket, availableNode]);
+
+  useEffect(() => {
+    const initialEdges = [];
+    processInitialEdges({
+      nodes,
+      initialEdges,
+    });
+    setEdges(initialEdges);
+  }, [nodes]);
+
+  const handleClickNode = (_, node) => {
+    if (node.data?.type === "vppb") {
+      if (availableNode.vppb) {
+        setAvailableNode({ vcs: null, vppb: null, ppb: [] });
+      } else {
+        if (node.data.vppb.boundPortId) {
+          const availablePPB = ppb.find(
+            (data) => (data.portId = node.data.vppb.boundPortId)
           );
-          if (device) {
-            DSPToSLD.push(port.portId);
-            SLD.push(device.deviceSerialNumber);
-          } else {
-            DSPToSLD.push(null);
-            SLD.push("X".repeat(16));
-          }
+          setAvailableNode({
+            vcs: node.data.virtualCxlSwitchId,
+            vppb: node.data,
+            ppb: [availablePPB],
+          });
         } else {
-          DSPToSLD.push(null);
-          SLD.push("X".repeat(16));
-        }
-        const foundVCS = vcsData.find((vcs) => {
-          return vcs.ppb_info_list.find(
-            (vppb) => vppb.boundPortId === port.portId
+          const availablePPB = ppb.filter(
+            (data) => data.boundVPPBId.length === 0
           );
-        });
-        if (foundVCS) {
-          DSPVCS.push(foundVCS.virtualCxlSwitchId);
-        } else {
-          DSPVCS.push(null);
+          setAvailableNode({
+            vcs: node.data.virtualCxlSwitchId,
+            vppb: node.data,
+            ppb: [...availablePPB],
+          });
         }
       }
-    });
-    setDisplayData({
-      host,
-      hostToUSP,
-      USP,
-      USPVCS,
-      DSP,
-      DSPToSLD,
-      SLD,
-      DSPVCS,
-    });
-  }, [portData, deviceData, vcsData]);
+    } else if (node.data?.type === "ppb") {
+      if (!availableNode.vppb || !availableNode.ppb) {
+        return;
+      }
+      if (
+        node.data.boundVPPBId.some(
+          (data) => data === availableNode?.vppb?.vppb.vppbId
+        )
+      ) {
+        setSocketEventData({
+          virtualCxlSwitchId: Number(availableNode.vcs),
+          vppbId: Number(availableNode.vppb.vppb.vppbId),
+        });
+        openDialog();
+      } else {
+        setSocketEventData({
+          virtualCxlSwitchId: Number(availableNode.vcs),
+          vppbId: Number(availableNode.vppb?.vppb.vppbId),
+          physicalPortId: Number(node.data.portId),
+        });
+        openDialog();
+      }
+    }
+  };
+
+  const handleSocketEvent = () => {
+    if (!socketEventData.physicalPortId) {
+      socket.emit(
+        "vcs:unbind",
+        {
+          virtualCxlSwitchId: socketEventData.virtualCxlSwitchId,
+          vppbId: socketEventData.vppbId,
+        },
+        (args) => {
+          if (args.error) {
+            setOpen({
+              ...open,
+              loading: false,
+            });
+            showError(args.error, vppb);
+            return;
+          }
+          setAvailableNode({ vcs: null, vppb: null, ppb: [] });
+        }
+      );
+    } else {
+      socket.emit(
+        "vcs:bind",
+        {
+          virtualCxlSwitchId: socketEventData.virtualCxlSwitchId,
+          vppbId: socketEventData.vppbId,
+          physicalPortId: socketEventData.physicalPortId,
+        },
+        (args) => {
+          if (args.error) {
+            setOpen({
+              ...open,
+              loading: false,
+            });
+            showError(args.error, vppb);
+            return;
+          }
+          setAvailableNode({ vcs: null, vppb: null, ppb: [] });
+        }
+      );
+    }
+    closeDialog();
+  };
 
   return (
-    <SideMenu>
-      <Col span={18} offset={3}>
-        <Row justify="space-around">
-          {displayData.host.map((host, index) => (
-            <Col key={`host-${index}`}>
-              <ItemCard
-                style={{
-                  opacity: host != null ? 1 : 0,
-                }}
-                bodyStyle={{
-                  padding: "15px 10px",
-                }}
-              >
-                <Space direction="vertical" size={0}>
-                  <DesktopOutlined style={{ fontSize: 30 }} />
-                  <span>Host</span>
-                </Space>
-              </ItemCard>
-            </Col>
-          ))}
-        </Row>
-        <Row justify="space-around">
-          {displayData.hostToUSP.map((port, index) => (
-            <Col key={`htu-${index}`}>
-              <Card
-                bordered={false}
-                bodyStyle={{
-                  paddingTop: 0,
-                  paddingBottom: 0,
-                }}
-                style={{
-                  width: 100,
-                  textAlign: "center",
-                  opacity: port != null ? 1 : 0,
-                }}
-              >
-                <Divider
-                  type="vertical"
-                  style={{
-                    borderLeft: "2px solid #9c9999",
-                    height: 32,
-                    top: 0,
-                  }}
-                />
-              </Card>
-            </Col>
-          ))}
-        </Row>
-        <BoardedCard
-          bodyStyle={{ padding: 0 }}
-          style={{
-            textAlign: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Row justify="space-around">
-            {displayData.USP.map((port, index) => (
-              <Col key={`usp-${index}`}>
-                <ItemCard
-                  hoverable={displayData.USPVCS[index] !== null}
-                  style={{
-                    opacity: port != null ? 1 : 0,
-                    pointerEvents:
-                      port != null && displayData.USPVCS[index] !== null
-                        ? "auto"
-                        : "none",
-                  }}
-                  bodyStyle={{
-                    padding: "15px 10px",
-                  }}
-                >
-                  <Link
-                    href={{
-                      pathname: "/vcs-status",
-                      query: { vcs: displayData.USPVCS[index] },
-                    }}
-                  >
-                    <Space direction="vertical" size={0}>
-                      {displayData.hostToUSP[index] != null ? (
-                        <PiPlugsConnectedBold style={{ fontSize: 25 }} />
-                      ) : (
-                        <PiPlugsBold style={{ fontSize: 25 }} />
-                      )}
-                      <span>Upstream Port {port}</span>
-                    </Space>
-                  </Link>
-                </ItemCard>
-              </Col>
-            ))}
-          </Row>
-          <Row justify="center" style={{ margin: "50px 0px" }}>
-            CXL Switch
-          </Row>
-          <Row justify="space-around">
-            {displayData.DSP.map((port, index) => (
-              <Col key={`dsp-${index}`}>
-                <ItemCard
-                  hoverable={displayData.DSPVCS[index] !== null}
-                  style={{
-                    backgroundColor:
-                      displayData.DSPVCS[index] == null
-                        ? "lightgrey"
-                        : "inherit",
-                    opacity: port != null ? 1 : 0,
-                    pointerEvents:
-                      port != null && displayData.DSPVCS[index] !== null
-                        ? "auto"
-                        : "none",
-                  }}
-                  bodyStyle={{
-                    padding: "15px 10px",
-                  }}
-                >
-                  <Link
-                    href={{
-                      pathname: "/vcs-status",
-                      query: { vcs: displayData.DSPVCS[index] },
-                    }}
-                  >
-                    <Space direction="vertical" size={0}>
-                      {displayData.DSPToSLD[index] != null ? (
-                        <PiPlugsConnectedBold style={{ fontSize: 25 }} />
-                      ) : (
-                        <PiPlugsBold style={{ fontSize: 25 }} />
-                      )}
-                      <div>Downstream</div>
-                      <div>Port {port}</div>
-                    </Space>
-                  </Link>
-                </ItemCard>
-              </Col>
-            ))}
-          </Row>
-        </BoardedCard>
-        <Row justify="space-around">
-          {displayData.DSPToSLD.map((port, index) => (
-            <Col key={`dts-${index}`}>
-              <Card
-                bordered={false}
-                bodyStyle={{
-                  paddingTop: 0,
-                  paddingBottom: 0,
-                }}
-                style={{
-                  width: 100,
-                  textAlign: "center",
-                  opacity: port != null ? 1 : 0,
-                }}
-              >
-                <Divider
-                  type="vertical"
-                  style={{
-                    borderLeft: "2px solid #9c9999",
-                    height: 32,
-                    top: 0,
-                  }}
-                />
-              </Card>
-            </Col>
-          ))}
-        </Row>
-        <Row justify="space-around">
-          {displayData.SLD.map((sld, index) => (
-            <Col key={`sld-${index}`}>
-              <ItemCard
-                hoverable={displayData.DSPVCS[index] !== null}
-                style={{
-                  opacity: sld != "X".repeat(16) ? 1 : 0,
-                  pointerEvents:
-                    sld !== "X".repeat(16) && displayData.DSPVCS[index] !== null
-                      ? "auto"
-                      : "none",
-                }}
-                bodyStyle={{
-                  padding: "15px 10px",
-                }}
-              >
-                <Link
-                  href={{
-                    pathname: "/vcs-status",
-                    query: { vcs: displayData.DSPVCS[index] },
-                  }}
-                >
-                  <Space direction="vertical" size={0}>
-                    <FaMemory style={{ fontSize: 25 }} />
-                    <span>{`SLD "${sld}"`}</span>
-                  </Space>
-                </Link>
-              </ItemCard>
-            </Col>
-          ))}
-        </Row>
-      </Col>
-    </SideMenu>
+    <div className="w-full h-screen overflow-x-auto">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgeschange}
+        nodesDraggable={false}
+        viewport={{ zoom: 1 }}
+        onNodeClick={handleClickNode}
+        deleteKeyCode={null}
+      />
+      <Dialog isOpen={isDialogOpen}>
+        <h1 className="text-xl font-semibold">Dialog</h1>
+        <p className="text-sm">
+          Do you really want to{" "}
+          {socketEventData.physicalPortId ? "Bind" : "Unbind"}?
+        </p>
+        <div className="flex justify-end">
+          <button
+            onClick={closeDialog}
+            className="h-[48px] px-6 py-3 hover:bg-gray4"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSocketEvent}
+            className={
+              "text-regular h-[48px] rounded bg-purple px-6 py-3 text-white bg-black"
+            }
+          >
+            Confirm
+          </button>
+        </div>
+      </Dialog>
+    </div>
   );
-};
-export default Overview;
+}
