@@ -4,13 +4,15 @@ export const processCXLSocketData = ({ portData, vcsData }) => {
   const device = [];
   const ppb = [];
 
+  let hostColorIndex = 0;
   portData.forEach((port) => {
     if (port.currentPortConfigurationState === "USP") {
       if (port.ltssmState === "L0") {
+        const COLOR = ["#2097F6", "#65BF73"];
         host.push({
           portType: "USP",
           portId: port.portId,
-          backgroundColor: null,
+          backgroundColor: COLOR[hostColorIndex],
         });
         vcs.push({
           uspId: port.portId,
@@ -22,6 +24,7 @@ export const processCXLSocketData = ({ portData, vcsData }) => {
             vppbId: null,
           },
         });
+        hostColorIndex++;
       } else {
         host.push(null);
       }
@@ -64,7 +67,6 @@ export const processCXLSocketData = ({ portData, vcsData }) => {
             info.boundVPPBId.push(vppb.vppbId);
           }
         });
-        // ppb.portId와 vppb.bounPortId가 같은게 있다면, ppb.boundVPPBId에 push 해야한다.
       }
     });
   });

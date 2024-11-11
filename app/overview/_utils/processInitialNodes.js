@@ -28,15 +28,10 @@ export const processInitialNodes = ({
     PPB: 38,
   };
 
-  const COLOR = ["#2097F6", "#65BF73"];
-  host.map((data, index) => {
-    data.backgroundColor = COLOR[index] || "#EEEEFF";
-  });
-
   const eachHostvPPBlength = [];
   host.map((data) => {
     eachHostvPPBlength.push(
-      vPPBForPPB.filter((info) => data.portId === info.uspId).length
+      vPPBForPPB.filter((info) => data?.portId === info.uspId).length
     );
   });
 
@@ -121,9 +116,12 @@ export const processInitialNodes = ({
   const vppbGroup = [];
   host.map((data, index) => {
     vppbGroup.push({
-      id: `group_vppb_${data.portId}`,
+      id: `group_vppb_${data?.portId}`,
       type: "default",
-      position: { x: 20 * (index + 1) + index * vcsWidth[index], y: 20 },
+      position: {
+        x: 20 * (index + 1) + index * vcsWidth[index === 0 ? index : index - 1],
+        y: 20,
+      },
       data: { label: `VCS${index}` },
       style: {
         width: `${vcsWidth[index]}px`,
@@ -167,7 +165,7 @@ export const processInitialNodes = ({
   /* Host */
   host.map((data, index) => {
     initialNodes.push({
-      id: `host_${data.portId}`,
+      id: `host_${data?.portId}`,
       position: {
         x:
           groupBox.vcsWidth[index] -
@@ -175,12 +173,12 @@ export const processInitialNodes = ({
             (groupBox.vcsWidth[index] - nodeBox.width) / 2 || 0,
         y: -96,
       },
-      data: { ...data, type: "host", label: `Host ${data.portId}` },
+      data: { ...data, type: "host", label: `Host ${index}` },
       type: "input",
       style: {
         width: `${nodeBox.width}px`,
         height: `${nodeBox.height}px`,
-        backgroundColor: `${data.backgroundColor}`,
+        backgroundColor: `${data?.backgroundColor}`,
         border: "none",
         borderRadius: "8px",
         display: "flex",
@@ -190,7 +188,7 @@ export const processInitialNodes = ({
         fontWeight: "600",
         color: "white",
       },
-      parentId: `group_vppb_${data.portId}`,
+      parentId: `group_vppb_${data?.portId}`,
       extend: "parent",
       selectable: false,
     });
@@ -224,7 +222,7 @@ export const processInitialNodes = ({
         alignItems: "center",
         fontSize: "20px",
       },
-      parentId: `group_vppb_${data.uspId}`,
+      parentId: `group_vppb_${data?.uspId}`,
       extend: "parent",
       selectable: false,
     });
@@ -278,7 +276,7 @@ export const processInitialNodes = ({
         position: "absolute",
       },
       className: "vppb_node",
-      parentId: `group_vppb_${data.uspId}`,
+      parentId: `group_vppb_${data?.uspId}`,
       extend: "parent",
     });
     index++;
@@ -287,12 +285,12 @@ export const processInitialNodes = ({
   /* PPB */
   ppb.map((data, index) => {
     initialNodes.push({
-      id: `ppb_${data.portId}`,
+      id: `ppb_${data?.portId}`,
       position: {
         x: padding.PPB + index * (nodeBox.width + gap.row) || 0,
         y: 20,
       },
-      data: { ...data, type: "ppb", label: `PPB ${data.portId}` },
+      data: { ...data, type: "ppb", label: `PPB ${data?.portId}` },
       style: {
         width: `${nodeBox.width}px`,
         height: `${nodeBox.height}px`,
@@ -328,18 +326,18 @@ export const processInitialNodes = ({
   /* Device */
   device.map((data, index) => {
     initialNodes.push({
-      id: `device_${data.portId}`,
+      id: `device_${data?.portId}`,
       type: "output",
       position: {
         x: padding.PPB + index * (nodeBox.width + gap.row) || 0,
         y: 136,
       },
-      data: { ...data, type: "device", label: `Device ${data.portId}` }, // SLD 또는 MLD 구분 해야함.
+      data: { ...data, type: "device", label: `Device ${data?.portId}` }, // SLD 또는 MLD 구분 해야함.
       style: {
         width: `${nodeBox.width}px`,
         height: `${nodeBox.height}px`,
         backgroundColor: `${
-          host.find((info) => data.hostId === info.portId)?.backgroundColor ||
+          host.find((info) => data?.hostId === info?.portId)?.backgroundColor ||
           "#EEEEFF"
         }`,
         border: "none",

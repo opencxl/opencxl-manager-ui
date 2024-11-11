@@ -1,11 +1,7 @@
 .vppb_node:hover {
   background-color: #aca9f1 !important;
   color: #ffffff !important;
-}
-
-.ppb_node:hover {
-  background-color: #aca9f1 !important;
-  color: #ffffff !important;
+  transition: color 0.3s ease, background-color 0.3s ease;
 }
 
 .vcs_group div {
@@ -16,4 +12,35 @@
   background-color: #ff5a43 !important;
   border: 5px solid #ff5a43 !important;
   cursor: default !important;
+}
+
+.ppb_node {
+  transition: transform 0.3s ease, opacity 0.3s ease !important;
+}
+
+.ppb_node::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-image: url("./_img/Link.svg") !important;
+  background-size: auto !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  transition: transform 0.3s ease !important;
+  opacity: 0 !important;
+  transform: scale(0.8) !important;
+  transition: opacity 0.3s ease, transform 0.3s ease !important;
+}
+
+.ppb_node:hover {
+  background-color: #aca9f1 !important;
+  coloe: transparent !important;
+}
+
+.ppb_node:hover::after {
+  transform: scale(1) !important;
+  opacity: 1 !important;
 }

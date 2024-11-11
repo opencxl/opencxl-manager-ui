@@ -27,7 +27,7 @@ export const processInitialEdges = ({ nodes, initialEdges }) => {
     const vppb = vppbsForUSP.filter(
       (data) => data.data.uspId === host.data.portId
     );
-    host.target = vppb[0].source;
+    host.target = vppb[0]?.source;
   });
 
   vppbsForUSP.forEach((vppbForUSP) => {
