@@ -27,15 +27,13 @@ const Dialog = ({
         <div className="flex justify-end">
           <button
             onClick={closeDialog}
-            className="w-[102px] h-[48px] px-6 py-3 hover:bg-gray4"
+            className=" h-[48px] px-6 py-3 hover:bg-gray4"
           >
             Cancel
           </button>
           <button
             onClick={handleSocketEvent}
-            className={
-              "w-[102px] h-[48px] rounded px-6 py-3 text-white bg-black"
-            }
+            className={"h-[48px] rounded px-6 py-3 text-white bg-black"}
           >
             {socketEventData.physicalPortId ? "Binding" : "Unbinding"}
           </button>
