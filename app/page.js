@@ -10,13 +10,15 @@ import { ReactFlow, useNodesState } from "@xyflow/react";
 import { processInitialNodes } from "./_utils/processInitialNodes";
 import { processInitialEdges } from "./_utils/processInitialEdges";
 import Dialog from "./_components/Dialog/Dialog";
+import DeviceTooltip from "./_components/Tooltip/Tooltip";
 
-// 완성 후에 RootLayout 은 따로 두고, 이 페이지는 page로 옮기자
 export default function Overview() {
   const { socket } = useSocket();
   const [isDialogOpen, setDialogOpen] = useState(false);
   const openDialog = () => setDialogOpen(true);
   const closeDialog = () => setDialogOpen(false);
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+  const [tooltipData, setTooltipData] = useState(null);
 
   const { portData, deviceData, vcsData } = useCXLSocket(socket);
   const { host, vcs, device, ppb } = processCXLSocketData({
@@ -172,6 +174,22 @@ export default function Overview() {
     closeDialog();
   };
 
+  const handleMouseEnter = (_, node) => {
+    if (!(node.data?.type === "device")) {
+      return;
+    }
+    setIsTooltipOpen(true);
+    setTooltipData(node);
+  };
+
+  const handleMouseLeave = (_, node) => {
+    if (!(node.data?.type === "device")) {
+      return;
+    }
+    setIsTooltipOpen(false);
+    setTooltipData(null);
+  };
+
   return (
     <div className="w-full h-screen overflow-x-auto">
       <ReactFlow
@@ -179,11 +197,14 @@ export default function Overview() {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgeschange}
-        nodesDraggable={false}
-        viewport={{ zoom: 1 }}
         onNodeClick={handleClickNode}
+        onNodeMouseEnter={handleMouseEnter}
+        onNodeMouseLeave={handleMouseLeave}
+        viewport={{ zoom: 1 }}
+        nodesDraggable={false}
         deleteKeyCode={null}
-      />
+      ></ReactFlow>
+      <DeviceTooltip isOpen={isTooltipOpen} node={tooltipData} />
       <Dialog
         isOpen={isDialogOpen}
         closeDialog={closeDialog}

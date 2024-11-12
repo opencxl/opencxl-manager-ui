@@ -288,7 +288,6 @@ export const processInitialNodes = ({
   });
 
   /* PPB */
-  console.log("availableNode: ", availableNode);
   ppb.map((data, index) => {
     initialNodes.push({
       id: `ppb_${data?.portId}`,
