@@ -94,8 +94,6 @@ export const processInitialNodes = ({
     selectable: false,
   });
 
-  console.log("width: ", window.innerWidth);
-  console.log("width: ", window.innerHeight / 5);
   /* VCS Group */
   const vcsGroup = {
     id: "group_vcs",
