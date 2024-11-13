@@ -94,13 +94,18 @@ export const processInitialNodes = ({
     selectable: false,
   });
 
+  console.log("width: ", window.innerWidth);
+  console.log("width: ", window.innerHeight / 5);
   /* VCS Group */
   const vcsGroup = {
     id: "group_vcs",
     type: "group",
     position: {
-      x: 1920 - groupBox.switchWidth - (1920 - groupBox.switchWidth) / 2,
-      y: 195,
+      x:
+        window.innerWidth -
+        groupBox.switchWidth -
+        (window.innerWidth - groupBox.switchWidth) / 2,
+      y: window.innerHeight / 5,
     },
     style: {
       width: `${groupBox.switchWidth}px`,
@@ -140,7 +145,6 @@ export const processInitialNodes = ({
         alignItems: "start",
         padding: "20px",
         fontSize: "14px",
-        color: "#4C4C4C",
       },
       parentId: "group_vcs",
       extend: "parent",
