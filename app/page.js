@@ -24,6 +24,7 @@ export default function Overview() {
   const { host, vcs, device, ppb } = processCXLSocketData({
     portData,
     vcsData,
+    deviceData,
   });
   const [displayData, setDisplayData] = useState({
     host: [],

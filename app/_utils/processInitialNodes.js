@@ -341,10 +341,11 @@ export const processInitialNodes = ({
         x: padding.PPB + index * (nodeBox.width + gap.row) || 0,
         y: 136,
       },
-      data: { ...data, type: "device", label: `SLD` }, // SLD 또는 MLD 구분 해야함.
+      data: { ...data, type: "device", label: data.deviceType }, // SLD 또는 MLD 구분 해야함.
       style: {
         width: `${nodeBox.width}px`,
-        height: `${nodeBox.height}px`,
+        height: `${data.deviceType === "SLD" ? nodeBox.height : "378"}px`,
+        // 수정이 필요하다.
         backgroundColor: `${
           host.find((info) => data?.hostId === info?.portId)?.backgroundColor ||
           "#EEEEFF"
@@ -353,7 +354,8 @@ export const processInitialNodes = ({
         borderRadius: "8px",
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
+        alignItems: `${data.deviceType === "SLD" ? "center" : "start"}`,
+        paddingTop: `${data.deviceType === "SLD" ? null : "20px"}`,
         fontSize: "20px",
         zIndex: true ? defaultZIndex : deviceZIndex,
         opacity: 1,
@@ -361,6 +363,43 @@ export const processInitialNodes = ({
       parentId: "group_ppb",
       extend: "parent",
     });
+  });
+
+  device.map((data) => {
+    if (data.deviceType === "MLD") {
+      data.logicalDevices.forEach((dev, number) => {
+        initialNodes.push({
+          id: `logicalDevice_${dev?.deviceSerialNumber}`,
+          type: "default",
+          position: {
+            x: 10 + (number / 8 >= 1.0 ? 52 : 0),
+            y: 56 + 40 * (number % 8),
+          },
+          data: { ...dev, type: "logicalDevice", label: `LD ${number}` }, // SLD 또는 MLD 구분 해야함.
+          style: {
+            width: "42px",
+            height: "32px",
+            // 수정이 필요하다. - 할당된 Host 로 수정해야한다.
+            // backgroundColor: `${
+            //   host.find((info) => data?.hostId === info?.portId)
+            //     ?.backgroundColor || "#EEEEFF"
+            // }`,
+            backgroundColor: "#2097F6",
+            border: "none",
+            borderRadius: "8px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: "12px",
+            zIndex: true ? defaultZIndex : deviceZIndex,
+            opacity: 1,
+          },
+          parentId: `device_${data?.portId}`,
+          extend: "parent",
+          className: "logical_device",
+        });
+      });
+    }
   });
 
   return initialNodes;

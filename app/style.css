@@ -8,6 +8,10 @@
   display: none !important;
 }
 
+.logical_device div {
+  display: none !important;
+}
+
 .react-flow__handle {
   background-color: #ff5a43 !important;
   border: 5px solid #ff5a43 !important;
