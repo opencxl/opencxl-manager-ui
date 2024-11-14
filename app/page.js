@@ -97,7 +97,7 @@ export default function Overview() {
           });
         } else {
           const availablePPB = ppb.filter(
-            (data) => data.boundVPPBId.length === 0
+            (data) => data.boundVPPBId.length === 0 || data.deviceType === "MLD"
           );
           setAvailableNode({
             vcs: node.data.virtualCxlSwitchId,
@@ -107,26 +107,26 @@ export default function Overview() {
         }
       }
     } else if (node.data?.type === "ppb") {
-      if (!availableNode.vppb || !availableNode.ppb) {
-        return;
-      }
-      if (
-        node.data.boundVPPBId.some(
-          (data) => data === availableNode?.vppb?.vppb.vppbId
-        )
-      ) {
-        setSocketEventData({
-          virtualCxlSwitchId: Number(availableNode.vcs),
-          vppbId: Number(availableNode.vppb.vppb.vppbId),
-        });
-        openDialog();
-      } else {
-        setSocketEventData({
-          virtualCxlSwitchId: Number(availableNode.vcs),
-          vppbId: Number(availableNode.vppb?.vppb.vppbId),
-          physicalPortId: Number(node.data.portId),
-        });
-        openDialog();
+      if (availableNode.vppb || availableNode.ppb) {
+        console.log("avail: ", node);
+        if (
+          node.data.boundVPPBId.some(
+            (data) => data === availableNode?.vppb?.vppb.vppbId
+          )
+        ) {
+          setSocketEventData({
+            virtualCxlSwitchId: Number(availableNode.vcs),
+            vppbId: Number(availableNode.vppb.vppb.vppbId),
+          });
+          openDialog();
+        } else {
+          setSocketEventData({
+            virtualCxlSwitchId: Number(availableNode.vcs),
+            vppbId: Number(availableNode.vppb?.vppb.vppbId),
+            physicalPortId: Number(node.data.portId),
+          });
+          openDialog();
+        }
       }
     }
   };
@@ -192,26 +192,28 @@ export default function Overview() {
   };
 
   return (
-    <div className="w-full h-screen overflow-x-auto">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgeschange}
-        onNodeClick={handleClickNode}
-        onNodeMouseEnter={handleMouseEnter}
-        onNodeMouseLeave={handleMouseLeave}
-        viewport={{ zoom: 1 }}
-        nodesDraggable={false}
-        deleteKeyCode={null}
-      ></ReactFlow>
+    <>
       <DeviceTooltip isOpen={isTooltipOpen} node={tooltipData} />
-      <Dialog
-        isOpen={isDialogOpen}
-        closeDialog={closeDialog}
-        socketEventData={socketEventData}
-        handleSocketEvent={handleSocketEvent}
-      />
-    </div>
+      <div className="w-full h-screen overflow-x-auto z-0">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgeschange}
+          onNodeClick={handleClickNode}
+          onNodeMouseEnter={handleMouseEnter}
+          onNodeMouseLeave={handleMouseLeave}
+          viewport={{ zoom: 1 }}
+          nodesDraggable={false}
+          deleteKeyCode={null}
+        ></ReactFlow>
+        <Dialog
+          isOpen={isDialogOpen}
+          closeDialog={closeDialog}
+          socketEventData={socketEventData}
+          handleSocketEvent={handleSocketEvent}
+        />
+      </div>
+    </>
   );
 }

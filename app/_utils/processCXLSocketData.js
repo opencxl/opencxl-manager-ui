@@ -153,37 +153,6 @@ export const processCXLSocketData = ({ portData, vcsData, deviceData }) => {
     });
   });
 
-  deviceData.forEach((dev) => {
-    if (!dev.deviceType) {
-      dev["deviceType"] = "SLD";
-    }
-
-    const port = portData.find((p) => p.portId === dev.boundPortId);
-    if (port && port.ltssmState === "L0") {
-      device.push({
-        portType: "DSP",
-        portId: port.portId,
-        boundVPPBId: [],
-        deviceType: dev.deviceType,
-        logicalDevices: !!dev.logicalDevice
-          ? dev.logicalDevice.map((ld) => ({
-              ...ld,
-              allocated: -1,
-            }))
-          : undefined,
-      });
-      ppb.push({
-        portType: "DSP",
-        portId: port.portId,
-        boundVPPBId: [],
-        deviceType: dev.deviceType,
-      });
-    } else {
-      device.push(null);
-      ppb.push(null);
-    }
-  });
-
   let hostColorIndex = 0;
   portData.forEach((port) => {
     if (port.currentPortConfigurationState === "USP") {
@@ -232,6 +201,55 @@ export const processCXLSocketData = ({ portData, vcsData, deviceData }) => {
         });
       }
     });
+  });
+
+  deviceData.forEach((dev) => {
+    if (!dev.deviceType) {
+      dev["deviceType"] = "SLD";
+    }
+
+    let hosts = [];
+    let boundPorts = [];
+
+    vcs.forEach((v) => {
+      if (v.vppb.boundPortId === dev.boundPortId) {
+        const status = v.vppb.bindingStatus;
+        if (status === "BOUND_LD") {
+          const relatedHost = host.find((h) => h.portId === v.uspId);
+          hosts.push({
+            hostId: v.uspId,
+            color: relatedHost?.backgroundColor,
+          });
+          boundPorts.push(v.vppb.vppbId);
+        }
+      }
+    });
+
+    const port = portData.find((p) => p.portId === dev.boundPortId);
+    if (port && port.ltssmState === "L0") {
+      device.push({
+        portType: "DSP",
+        portId: port.portId,
+        boundVPPBId: boundPorts,
+        hosts,
+        deviceType: dev.deviceType,
+        logicalDevices: !!dev.logicalDevice
+          ? dev.logicalDevice.map((ld) => ({
+              ...ld,
+              allocated: -1,
+            }))
+          : undefined,
+      });
+      ppb.push({
+        portType: "DSP",
+        portId: port.portId,
+        boundVPPBId: boundPorts,
+        deviceType: dev.deviceType,
+      });
+    } else {
+      device.push(null);
+      ppb.push(null);
+    }
   });
 
   // console.log("deviceInfo: ", device);

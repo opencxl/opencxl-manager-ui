@@ -103,7 +103,7 @@ export const processInitialNodes = ({
         window.innerWidth -
         groupBox.switchWidth -
         (window.innerWidth - groupBox.switchWidth) / 2,
-      y: window.innerHeight / 5,
+      y: window.innerHeight / 7,
     },
     style: {
       width: `${groupBox.switchWidth}px`,
@@ -200,6 +200,7 @@ export const processInitialNodes = ({
       selectable: false,
     });
   });
+  // 글씨 조절
 
   /* vPPB For Host */
   vPPBForHOST.map((data, index) => {
@@ -333,7 +334,8 @@ export const processInitialNodes = ({
   });
 
   /* Device */
-  device.map((data, index) => {
+  // console.log("device: ", device);
+  device.forEach((data, index) => {
     initialNodes.push({
       id: `device_${data?.portId}`,
       type: "output",
@@ -345,11 +347,12 @@ export const processInitialNodes = ({
       style: {
         width: `${nodeBox.width}px`,
         height: `${data.deviceType === "SLD" ? nodeBox.height : "378"}px`,
-        // 수정이 필요하다.
-        backgroundColor: `${
-          host.find((info) => data?.hostId === info?.portId)?.backgroundColor ||
-          "#EEEEFF"
-        }`,
+        backgroundColor:
+          data.deviceType === "SLD"
+            ? data.hosts.length > 0 && data.boundVPPBId.length > 0
+              ? data.hosts[0].color
+              : "#EEEEFF"
+            : "#EEEEFF",
         border: "none",
         borderRadius: "8px",
         display: "flex",
@@ -365,7 +368,7 @@ export const processInitialNodes = ({
     });
   });
 
-  device.map((data) => {
+  device.forEach((data) => {
     if (data.deviceType === "MLD") {
       data.logicalDevices.forEach((dev, number) => {
         initialNodes.push({
@@ -387,10 +390,11 @@ export const processInitialNodes = ({
             backgroundColor: "#2097F6",
             border: "none",
             borderRadius: "8px",
+            padding: "0px",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            fontSize: "12px",
+            fontSize: "14px",
             zIndex: true ? defaultZIndex : deviceZIndex,
             opacity: 1,
           },
