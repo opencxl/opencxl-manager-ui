@@ -12,9 +12,9 @@ export const processInitialEdges = ({ nodes, initialEdges }) => {
       return;
     } else if (node.data.type === "host") {
       hosts.push({ source: node.id, target: null, data: node.data });
-    } else if (node.data.hostPort && node.data.type === "vppb") {
+    } else if (node.data.type === "vppbForHost") {
       vppbsForUSP.push({ source: node.id, target: [], data: node.data });
-    } else if (node.data.type === "vppb") {
+    } else if (node.data.type === "vppbForPPB") {
       vppbs.push({ source: node.id, target: null, data: node.data });
     } else if (node.data.type === "ppb") {
       ppbs.push({ source: node.id, target: null, data: node.data });

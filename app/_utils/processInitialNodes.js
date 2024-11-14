@@ -214,7 +214,7 @@ export const processInitialNodes = ({
       },
       data: {
         ...data,
-        type: "vppb",
+        type: "vppbForHost",
         label: "vPPB",
       },
       style: {
@@ -251,7 +251,7 @@ export const processInitialNodes = ({
       },
       data: {
         ...data,
-        type: "vppb",
+        type: "vppbForPPB",
         label: `vPPB ${data.vppb.vppbId}`,
       },
       style: {

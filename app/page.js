@@ -81,7 +81,7 @@ export default function Overview() {
   }, [nodes]);
 
   const handleClickNode = (_, node) => {
-    if (node.data?.type === "vppb") {
+    if (node.data?.type === "vppbForPPB") {
       if (availableNode.vppb) {
         setAvailableNode({ vcs: null, vppb: null, ppb: [] });
       } else {
