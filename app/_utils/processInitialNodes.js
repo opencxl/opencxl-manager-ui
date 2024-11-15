@@ -310,31 +310,16 @@ export const processInitialNodes = ({
         justifyContent: "center",
         alignItems: "center",
         fontSize: "20px",
-        zIndex: !availableNode.ppb?.some((info) => {
-          return info.portId === data.portId;
-        })
-          ? defaultZIndex
-          : ppbZIndex,
+        zIndex: true ? defaultZIndex : ppbZIndex,
         opacity: 1,
       },
-      className: `${
-        !availableNode.ppb?.some((info) => {
-          return info.portId === data.portId;
-        })
-          ? defaultZIndex
-          : ppbZIndex
-          ? availableNode.vppb.vppb.bindingStatus === "BOUND_LD"
-            ? "unbound_ppb_node"
-            : "bound_ppb_node"
-          : ""
-      }`,
+      // className: `${data.deviceType === "MLD" ? "mld_ppb_node" : ""}`,
       parentId: "group_ppb",
       extend: "parent",
     });
   });
 
   /* Device */
-  // console.log("device: ", device);
   device.forEach((data, index) => {
     initialNodes.push({
       id: `device_${data?.portId}`,
@@ -360,34 +345,68 @@ export const processInitialNodes = ({
         alignItems: `${data.deviceType === "SLD" ? "center" : "start"}`,
         paddingTop: `${data.deviceType === "SLD" ? null : "20px"}`,
         fontSize: "20px",
-        zIndex: true ? defaultZIndex : deviceZIndex,
+        // zIndex: true ? defaultZIndex : deviceZIndex,
+        zIndex: !availableNode.ppb?.some((info) => {
+          return info.portId === data.portId;
+        })
+          ? defaultZIndex
+          : deviceZIndex,
         opacity: 1,
       },
+      className: `${
+        data.deviceType === "MLD"
+          ? ""
+          : !availableNode.ppb?.some((info) => {
+              return info.portId === data.portId;
+            })
+          ? defaultZIndex
+          : ppbZIndex
+          ? availableNode.vppb.vppb.bindingStatus === "BOUND_LD"
+            ? "unbound_device_node"
+            : "bound_device_node"
+          : ""
+      }`,
       parentId: "group_ppb",
       extend: "parent",
     });
   });
 
+  console.log("avail: ", availableNode);
+  // console.log("device: ", device);
   device.forEach((data) => {
     if (data.deviceType === "MLD") {
-      data.logicalDevices.forEach((dev, number) => {
+      const { logicalDevices } = data;
+
+      logicalDevices.ldAllocationList.forEach((isAllocated, index) => {
+        if (index >= logicalDevices.numberOfLds) return;
+
+        const boundLD = logicalDevices.boundLdId.find((ld) => ld.to === index);
+
+        // boundLD가 있을 경우, boundVPPBId 배열에서의 인덱스를 찾아 해당하는 hosts 색상을 사용
+        const hostColor = boundLD
+          ? data.hosts[data.boundVPPBId.findIndex((id) => id === boundLD.from)]
+              ?.color
+          : "#D9D9D9";
+
         initialNodes.push({
-          id: `logicalDevice_${dev?.deviceSerialNumber}`,
+          id: `logicalDevice_${logicalDevices.portId}_${index}`,
           type: "default",
           position: {
-            x: 10 + (number / 8 >= 1.0 ? 52 : 0),
-            y: 56 + 40 * (number % 8),
+            x: 10 + (index / 8 >= 1.0 ? 52 : 0),
+            y: 56 + 40 * (index % 8),
           },
-          data: { ...dev, type: "logicalDevice", label: `LD ${number}` }, // SLD 또는 MLD 구분 해야함.
+          data: {
+            ...(boundLD || {}),
+            type: "logicalDevice",
+            label: `LD ${index}`,
+            ldId: index,
+            mld: data,
+            isAllocated: isAllocated === 1,
+          },
           style: {
             width: "42px",
             height: "32px",
-            // 수정이 필요하다. - 할당된 Host 로 수정해야한다.
-            // backgroundColor: `${
-            //   host.find((info) => data?.hostId === info?.portId)
-            //     ?.backgroundColor || "#EEEEFF"
-            // }`,
-            backgroundColor: "#2097F6",
+            backgroundColor: hostColor,
             border: "none",
             borderRadius: "8px",
             padding: "0px",
@@ -395,12 +414,20 @@ export const processInitialNodes = ({
             justifyContent: "center",
             alignItems: "center",
             fontSize: "14px",
-            zIndex: true ? defaultZIndex : deviceZIndex,
+            zIndex: !availableNode.ppb?.some((info) => {
+              return info.portId === data.portId;
+            })
+              ? defaultZIndex
+              : deviceZIndex,
             opacity: 1,
           },
           parentId: `device_${data?.portId}`,
           extend: "parent",
-          className: "logical_device",
+          className: availableNode.vppb
+            ? availableNode.vppb.vppb.boundPortId
+              ? "logical_device unbound_logical_device"
+              : "logical_device bound_logical_device"
+            : "logical_device",
         });
       });
     }

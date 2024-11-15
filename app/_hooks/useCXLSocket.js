@@ -6,6 +6,7 @@ export const useCXLSocket = (socket) => {
   const [portData, setPortData] = useState([]);
   const [deviceData, setDeviceData] = useState([]);
   const [vcsData, setVCSData] = useState([]);
+  const [mldData, setMLDData] = useState([]);
 
   useEffect(() => {
     if (!socket) return;
@@ -37,9 +38,38 @@ export const useCXLSocket = (socket) => {
     };
   }, [socket]);
 
+  useEffect(() => {
+    if (!socket) return;
+    setMLDData([]);
+    const mld = portData.filter(
+      (port) => port.connectedDeviceType.split("_").at(-1) === "MLD"
+    );
+
+    const getMLDAllocation = () => {
+      mld.forEach((m) => {
+        socket.emit(
+          "mld:getAllocation",
+          {
+            port_index: m.portId,
+            start_ld_id: 0,
+            ld_allocation_list_limit: 16,
+          },
+          (data) => {
+            setMLDData((prev) => [
+              ...prev,
+              { ...data["result"], portId: m.portId },
+            ]);
+          }
+        );
+      });
+    };
+    getMLDAllocation();
+  }, [portData]);
+
   return {
     portData,
     deviceData,
     vcsData,
+    mldData,
   };
 };

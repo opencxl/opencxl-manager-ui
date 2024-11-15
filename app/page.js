@@ -20,23 +20,24 @@ export default function Overview() {
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
   const [tooltipData, setTooltipData] = useState(null);
 
-  const { portData, deviceData, vcsData } = useCXLSocket(socket);
+  const { portData, deviceData, vcsData, mldData } = useCXLSocket(socket);
   const { host, vcs, device, ppb } = processCXLSocketData({
     portData,
     vcsData,
     deviceData,
+    mldData,
   });
   const [displayData, setDisplayData] = useState({
     host: [],
     vcs: [],
-    device: [] /* SLD, MLD 구분이 가능해지면 추후 관련된 데이터 추가 필요 */,
+    device: [],
     ppb: [],
   });
   const [socketEventData, setSocketEventData] = useState({
     virtualCxlSwitchId: null,
     vppbId: null,
     physicalPortId: null,
-    ld: null,
+    logicalDeviceId: null,
     eventName: null,
   });
   const [availableNode, setAvailableNode] = useState({
@@ -55,7 +56,7 @@ export default function Overview() {
       device: device,
       ppb: ppb,
     });
-  }, [portData, vcsData, deviceData]);
+  }, [portData, vcsData, deviceData, mldData]);
 
   useEffect(() => {
     if (host.length && vcs.length && ppb.length && device.length) {
@@ -71,7 +72,7 @@ export default function Overview() {
 
       setNodes(initialNodes);
     }
-  }, [portData, deviceData, vcsData, socket, availableNode]);
+  }, [portData, deviceData, vcsData, mldData, socket, availableNode]);
 
   useEffect(() => {
     const initialEdges = [];
@@ -87,48 +88,73 @@ export default function Overview() {
       if (availableNode.vppb) {
         setAvailableNode({ vcs: null, vppb: null, ppb: [] });
       } else {
-        if (node.data.vppb.boundPortId) {
-          const availablePPB = ppb.find(
-            (data) => (data.portId = node.data.vppb.boundPortId)
+        if (node.data.vppb.bindingStatus === "BOUND_LD") {
+          const availableDevice = device.find(
+            (data) => data.portId === node.data.vppb.boundPortId
           );
           setAvailableNode({
             vcs: node.data.virtualCxlSwitchId,
             vppb: node.data,
-            ppb: [availablePPB],
+            ppb: [availableDevice],
           });
         } else {
-          const availablePPB = ppb.filter(
+          const availableDevice = device.filter(
             (data) => data.boundVPPBId.length === 0 || data.deviceType === "MLD"
           );
           setAvailableNode({
             vcs: node.data.virtualCxlSwitchId,
             vppb: node.data,
-            ppb: [...availablePPB],
+            ppb: [...availableDevice],
           });
         }
       }
-    } else if (node.data?.type === "ppb") {
-      if (availableNode.vppb) {
-        if (
-          node.data.boundVPPBId.some(
-            (data) => data === availableNode?.vppb?.vppb.vppbId
-          )
-        ) {
-          setSocketEventData({
-            virtualCxlSwitchId: Number(availableNode.vcs),
-            vppbId: Number(availableNode.vppb.vppb.vppbId),
-            eventName: "unbinding",
-          });
-          openDialog();
-        } else {
-          setSocketEventData({
-            virtualCxlSwitchId: Number(availableNode.vcs),
-            vppbId: Number(availableNode.vppb?.vppb.vppbId),
-            physicalPortId: Number(node.data.portId),
-            eventName: "binding",
-          });
-          openDialog();
+    } else if (node.data?.type === "device") {
+      if (node.data?.deviceType === "SLD") {
+        if (availableNode.vppb) {
+          if (
+            node.data.boundVPPBId.some(
+              (data) => data === availableNode?.vppb?.vppb.vppbId
+            )
+          ) {
+            setSocketEventData({
+              virtualCxlSwitchId: Number(availableNode.vcs),
+              vppbId: Number(availableNode.vppb.vppb.vppbId),
+              eventName: "unbinding",
+            });
+            openDialog();
+          } else {
+            setSocketEventData({
+              virtualCxlSwitchId: Number(availableNode.vcs),
+              vppbId: Number(availableNode.vppb?.vppb.vppbId),
+              physicalPortId: Number(node.data.portId),
+              eventName: "binding",
+            });
+            openDialog();
+          }
         }
+      }
+    } else if (node.data?.type === "logicalDevice") {
+      if (
+        availableNode.vppb?.vppb.boundPortId === node.data.mld.portId &&
+        availableNode.vppb?.vppb.boundLdId === node.data.ldId
+      ) {
+        setSocketEventData({
+          virtualCxlSwitchId: Number(availableNode.vcs),
+          vppbId: Number(availableNode.vppb.vppb.vppbId),
+          eventName: "unbinding",
+        });
+        openDialog();
+      }
+      // vppb가 아직 bound되지 않은 상태에서 새로운 LD를 클릭했을 때
+      else if (!availableNode.vppb?.vppb.boundPortId) {
+        setSocketEventData({
+          virtualCxlSwitchId: Number(availableNode.vcs),
+          vppbId: Number(availableNode.vppb?.vppb.vppbId),
+          physicalPortId: Number(node.data.mld.portId),
+          logicalDeviceId: Number(node.data.ldId),
+          eventName: "binding",
+        });
+        openDialog();
       }
     }
   };
@@ -154,12 +180,14 @@ export default function Overview() {
         }
       );
     } else {
+      console.log("socketEventData: ", socketEventData);
       socket.emit(
         "vcs:bind",
         {
           virtualCxlSwitchId: socketEventData.virtualCxlSwitchId,
           vppbId: socketEventData.vppbId,
           physicalPortId: socketEventData.physicalPortId,
+          logicalDeviceId: socketEventData.logicalDeviceId || null,
         },
         (args) => {
           if (args.error) {
