@@ -37,6 +37,7 @@ export default function Overview() {
     vppbId: null,
     physicalPortId: null,
     ld: null,
+    eventName: null,
   });
   const [availableNode, setAvailableNode] = useState({
     vcs: null,
@@ -107,8 +108,7 @@ export default function Overview() {
         }
       }
     } else if (node.data?.type === "ppb") {
-      if (availableNode.vppb || availableNode.ppb) {
-        console.log("avail: ", node);
+      if (availableNode.vppb) {
         if (
           node.data.boundVPPBId.some(
             (data) => data === availableNode?.vppb?.vppb.vppbId
@@ -117,6 +117,7 @@ export default function Overview() {
           setSocketEventData({
             virtualCxlSwitchId: Number(availableNode.vcs),
             vppbId: Number(availableNode.vppb.vppb.vppbId),
+            eventName: "unbinding",
           });
           openDialog();
         } else {
@@ -124,6 +125,7 @@ export default function Overview() {
             virtualCxlSwitchId: Number(availableNode.vcs),
             vppbId: Number(availableNode.vppb?.vppb.vppbId),
             physicalPortId: Number(node.data.portId),
+            eventName: "binding",
           });
           openDialog();
         }
@@ -176,24 +178,23 @@ export default function Overview() {
   };
 
   const handleMouseEnter = (_, node) => {
-    if (!(node.data?.type === "device")) {
+    if (node.data?.type === "device") {
+      setIsTooltipOpen(true);
+      setTooltipData(node);
       return;
     }
-    setIsTooltipOpen(true);
-    setTooltipData(node);
   };
 
   const handleMouseLeave = (_, node) => {
-    if (!(node.data?.type === "device")) {
+    if (node.data?.type === "device") {
+      setIsTooltipOpen(false);
+      setTooltipData(null);
       return;
     }
-    setIsTooltipOpen(false);
-    setTooltipData(null);
   };
 
   return (
     <>
-      <DeviceTooltip isOpen={isTooltipOpen} node={tooltipData} />
       <div className="w-full h-screen overflow-x-auto z-0">
         <ReactFlow
           nodes={nodes}
@@ -214,6 +215,7 @@ export default function Overview() {
           handleSocketEvent={handleSocketEvent}
         />
       </div>
+      <DeviceTooltip isOpen={isTooltipOpen} node={tooltipData} />
     </>
   );
 }
