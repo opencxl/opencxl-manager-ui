@@ -29,6 +29,11 @@
   display: none !important;
 }
 
+.unbound_logical_device {
+  border: 5px solid #0c1320 !important;
+  backgound-color: #eeeeff;
+}
+
 .unbound_logical_device::after {
   content: "" !important;
   position: absolute !important;
@@ -36,7 +41,7 @@
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  background-image: url("./_img/Link.svg") !important;
+  background-image: url("./_img/LinkBreak.svg") !important;
   background-size: auto !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
@@ -54,6 +59,11 @@
 .unbound_logical_device:hover::after {
   transform: scale(1) !important;
   opacity: 1 !important;
+}
+
+.bound_logical_device {
+  border: 5px solid #0c1320 !important;
+  background-color: #eeeeff;
 }
 
 .bound_logical_device::after {

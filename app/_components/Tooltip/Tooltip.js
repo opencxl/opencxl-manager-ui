@@ -6,7 +6,6 @@ const DeviceTooltip = ({ isOpen, node }) => {
   const tooltipContainer = document.querySelector(`[data-id="${node.id}"]`);
   const rect = tooltipContainer.getBoundingClientRect();
 
-  console.log("node: ", node);
   return ReactDOM.createPortal(
     <div className="relative">
       {node.data.deviceType === "SLD" ? (

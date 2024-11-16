@@ -5,6 +5,7 @@ export const processInitialNodes = ({
   device,
   initialNodes,
   availableNode,
+  availableLD,
 }) => {
   const vPPBForHOST = [];
   const vPPBForPPB = [];
@@ -386,6 +387,27 @@ export const processInitialNodes = ({
               ?.color
           : "#D9D9D9";
 
+        const getClassName = () => {
+          if (!availableNode.vppb) return "logical_device";
+
+          if (availableNode.vppb.vppb.boundPortId) {
+            // 언바인딩 시도할 때
+            return (availableLD || []).some(
+              (ld) =>
+                ld.to === index &&
+                ld.to === availableNode.vppb.vppb.boundLdId &&
+                logicalDevices.portId === availableNode.vppb.vppb.boundPortId
+            )
+              ? "logical_device unbound_logical_device"
+              : "logical_device";
+          } else {
+            // 바인딩 시도할 때
+            return !boundLD && // boundLD가 없는 경우만
+              availableNode.ppb?.some((p) => p.portId === logicalDevices.portId)
+              ? "logical_device bound_logical_device"
+              : "logical_device";
+          }
+        };
         initialNodes.push({
           id: `logicalDevice_${logicalDevices.portId}_${index}`,
           type: "default",
@@ -420,11 +442,7 @@ export const processInitialNodes = ({
           },
           parentId: `device_${data?.portId}`,
           extend: "parent",
-          className: availableNode.vppb
-            ? availableNode.vppb.vppb.boundPortId
-              ? "logical_device unbound_logical_device"
-              : "logical_device bound_logical_device"
-            : "logical_device",
+          className: getClassName(),
         });
       });
     }

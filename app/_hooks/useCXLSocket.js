@@ -41,12 +41,12 @@ export const useCXLSocket = (socket) => {
   useEffect(() => {
     if (!socket) return;
     setMLDData([]);
-    const mld = portData.filter(
+    const mld = portData?.filter(
       (port) => port.connectedDeviceType.split("_").at(-1) === "MLD"
     );
 
     const getMLDAllocation = () => {
-      mld.forEach((m) => {
+      mld?.forEach((m) => {
         socket.emit(
           "mld:getAllocation",
           {

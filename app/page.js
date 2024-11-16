@@ -45,6 +45,7 @@ export default function Overview() {
     vppb: null,
     ppb: [],
   });
+  const [availableLD, setAvailableLD] = useState(null);
 
   const [nodes, setNodes, onNodesChange] = useNodesState();
   const [edges, setEdges, onEdgeschange] = useNodesState();
@@ -68,11 +69,20 @@ export default function Overview() {
         device,
         initialNodes,
         availableNode,
+        availableLD,
       });
 
       setNodes(initialNodes);
     }
-  }, [portData, deviceData, vcsData, mldData, socket, availableNode]);
+  }, [
+    portData,
+    deviceData,
+    vcsData,
+    mldData,
+    socket,
+    availableNode,
+    availableLD,
+  ]);
 
   useEffect(() => {
     const initialEdges = [];
@@ -87,6 +97,7 @@ export default function Overview() {
     if (node.data?.type === "vppbForPPB") {
       if (availableNode.vppb) {
         setAvailableNode({ vcs: null, vppb: null, ppb: [] });
+        setAvailableLD(null);
       } else {
         if (node.data.vppb.bindingStatus === "BOUND_LD") {
           const availableDevice = device.find(
@@ -97,15 +108,26 @@ export default function Overview() {
             vppb: node.data,
             ppb: [availableDevice],
           });
+          if (availableDevice.deviceType === "MLD") {
+            setAvailableLD(availableDevice.logicalDevices.boundLdId);
+          }
         } else {
           const availableDevice = device.filter(
-            (data) => data.boundVPPBId.length === 0 || data.deviceType === "MLD"
+            (data) =>
+              data.boundVPPBId.length === 0 ||
+              (data.deviceType === "MLD" &&
+                data.logicalDevices.numberOfLds >
+                  data.logicalDevices.boundLdId.length)
           );
           setAvailableNode({
             vcs: node.data.virtualCxlSwitchId,
             vppb: node.data,
             ppb: [...availableDevice],
           });
+
+          if (availableDevice.deviceType === "MLD") {
+            setAvailableLD(data.logicalDevices.boundLdId);
+          }
         }
       }
     } else if (node.data?.type === "device") {
@@ -180,7 +202,6 @@ export default function Overview() {
         }
       );
     } else {
-      console.log("socketEventData: ", socketEventData);
       socket.emit(
         "vcs:bind",
         {

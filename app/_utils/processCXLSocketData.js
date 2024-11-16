@@ -10,7 +10,7 @@ export const processCXLSocketData = ({
   const ppb = [];
 
   let hostColorIndex = 0;
-  portData.forEach((port) => {
+  portData?.forEach((port) => {
     if (port.currentPortConfigurationState === "USP") {
       if (port.ltssmState === "L0") {
         const COLOR = ["#2097F6", "#65BF73"];
@@ -75,7 +75,7 @@ export const processCXLSocketData = ({
         }
       }
     });
-    const port = portData.find((p) => p.portId === dev.boundPortId);
+    const port = portData?.find((p) => p.portId === dev.boundPortId);
     if (port && port.ltssmState === "L0") {
       device.push({
         portType: "DSP",
@@ -102,7 +102,9 @@ export const processCXLSocketData = ({
       const boundLdIds = dev.boundVPPBId.map((deviceVPPBID) => {
         const matchingVCS = vcs.find((v) => v.vppb.vppbId === deviceVPPBID);
         return {
-          from: matchingVCS?.vppb.vppbId,
+          hostId: matchingVCS?.uspId,
+          vcsId: matchingVCS?.virtualCxlSwitchId,
+          from: matchingVCS?.vppb.vppbId || null,
           to: matchingVCS?.vppb.boundLdId,
         };
       });
