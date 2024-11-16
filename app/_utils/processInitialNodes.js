@@ -371,18 +371,13 @@ export const processInitialNodes = ({
     });
   });
 
-  console.log("avail: ", availableNode);
-  // console.log("device: ", device);
   device.forEach((data) => {
     if (data.deviceType === "MLD") {
       const { logicalDevices } = data;
 
-      logicalDevices.ldAllocationList.forEach((isAllocated, index) => {
-        if (index >= logicalDevices.numberOfLds) return;
-
+      Array.from({ length: logicalDevices.numberOfLds }).forEach((_, index) => {
         const boundLD = logicalDevices.boundLdId.find((ld) => ld.to === index);
 
-        // boundLD가 있을 경우, boundVPPBId 배열에서의 인덱스를 찾아 해당하는 hosts 색상을 사용
         const hostColor = boundLD
           ? data.hosts[data.boundVPPBId.findIndex((id) => id === boundLD.from)]
               ?.color
@@ -401,7 +396,6 @@ export const processInitialNodes = ({
             label: `LD ${index}`,
             ldId: index,
             mld: data,
-            isAllocated: isAllocated === 1,
           },
           style: {
             width: "42px",
