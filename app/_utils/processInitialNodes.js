@@ -39,15 +39,18 @@ export const processInitialNodes = ({
     return data * nodeBox.width + gap.row * (data - 1) + padding.vPPB * 2;
   });
 
+  const totalVPPBWidth = vcsWidth.reduce((acc, curr) => acc + curr, 0);
+
+  const ppbBoxWidth =
+    ppb.length * nodeBox.width + gap.row * (ppb.length - 1) + padding.PPB * 2;
+
+  // 두 넓이를 비교하여 더 큰 값 선택
+  const maxWidth = Math.max(totalVPPBWidth, ppbBoxWidth);
+
   const groupBox = {
     vcsWidth: vcsWidth,
-    ppbWidth:
-      ppb.length * nodeBox.width + gap.row * (ppb.length - 1) + padding.PPB * 2,
-    switchWidth:
-      ppb.length * nodeBox.width +
-      gap.row * (ppb.length - 1) +
-      padding.PPB +
-      2 * padding.PPB,
+    ppbWidth: ppbBoxWidth,
+    switchWidth: maxWidth + padding.PPB * 2, // 전체 박스에 패딩 추가
     largeRadius: 53,
     smallRadius: 32,
   };
