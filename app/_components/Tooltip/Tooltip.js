@@ -6,6 +6,7 @@ const DeviceTooltip = ({ isOpen, node }) => {
   const tooltipContainer = document.querySelector(`[data-id="${node.id}"]`);
   const rect = tooltipContainer.getBoundingClientRect();
 
+  console.log("node: ", node);
   return ReactDOM.createPortal(
     <div className="relative">
       {node.data.deviceType === "SLD" ? (
@@ -14,7 +15,6 @@ const DeviceTooltip = ({ isOpen, node }) => {
             position: "fixed",
             top: `${rect.top + 78}px`,
             left: `${rect.right - 155}px`, // 40에서 80으로 수정
-            zIndex: 9999,
           }}
         >
           <div className="absolute w-0 h-0 -top-9 left-1/2 transform -translate-x-1/2 border-[20px] border-solid border-t-transparent border-x-transparent border-b-black rounded-lg"></div>
@@ -31,7 +31,6 @@ const DeviceTooltip = ({ isOpen, node }) => {
             position: "fixed",
             top: `${rect.top + 92}px`,
             left: `${rect.left - 220}px`,
-            zIndex: 9999,
           }}
         >
           <div className="absolute w-0 h-0 -right-9 top-1/2 transform -translate-y-1/2 border-[20px] border-solid border-r-transparent border-y-transparent border-l-black rounded-lg"></div>
@@ -41,7 +40,7 @@ const DeviceTooltip = ({ isOpen, node }) => {
               Port ID <br /> {node.data.portId}
             </p>
             <p className="font-regular">
-              Allocated LDs <br /> {node.data.logicalDevices.length}
+              Allocated LDs <br /> {node.data.logicalDevices.boundLdId.length}
             </p>
           </div>
         </div>
