@@ -1,16 +1,16 @@
 "use client";
 
-import "./style.css";
+import { ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useEffect, useState } from "react";
+import Dialog from "./_components/Dialog/Dialog";
+import DeviceTooltip from "./_components/Tooltip/Tooltip";
 import { useSocket } from "./_components/providers/socket-provider";
 import { useCXLSocket } from "./_hooks/useCXLSocket";
 import { processCXLSocketData } from "./_utils/processCXLSocketData";
-import { ReactFlow, useNodesState } from "@xyflow/react";
-import { processInitialNodes } from "./_utils/processInitialNodes";
 import { processInitialEdges } from "./_utils/processInitialEdges";
-import Dialog from "./_components/Dialog/Dialog";
-import DeviceTooltip from "./_components/Tooltip/Tooltip";
+import { processInitialNodes } from "./_utils/processInitialNodes";
+import "./style.css";
 
 export default function Overview() {
   const { socket } = useSocket();
@@ -48,7 +48,7 @@ export default function Overview() {
   const [availableLD, setAvailableLD] = useState(null);
 
   const [nodes, setNodes, onNodesChange] = useNodesState();
-  const [edges, setEdges, onEdgeschange] = useNodesState();
+  const [edges, setEdges, onEdgesChange] = useEdgesState();
 
   useEffect(() => {
     setDisplayData({
@@ -71,9 +71,15 @@ export default function Overview() {
         availableNode,
         availableLD,
       });
-
       setNodes(initialNodes);
     }
+
+    const initialEdges = [];
+    processInitialEdges({
+      nodes,
+      initialEdges,
+    });
+    setEdges(initialEdges);
   }, [
     portData,
     deviceData,
@@ -83,15 +89,6 @@ export default function Overview() {
     availableNode,
     availableLD,
   ]);
-
-  useEffect(() => {
-    const initialEdges = [];
-    processInitialEdges({
-      nodes,
-      initialEdges,
-    });
-    setEdges(initialEdges);
-  }, [nodes]);
 
   const handleClickNode = (_, node) => {
     if (node.data?.type === "vppbForPPB") {
@@ -248,7 +245,7 @@ export default function Overview() {
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
-          onEdgesChange={onEdgeschange}
+          onEdgesChange={onEdgesChange}
           onNodeClick={handleClickNode}
           onNodeMouseEnter={handleMouseEnter}
           onNodeMouseLeave={handleMouseLeave}

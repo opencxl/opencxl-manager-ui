@@ -21,7 +21,7 @@ const Dialog = ({
             'vPPB {socketEventData.vppbId}' and&nbsp;
             {socketEventData.logicalDeviceId !== undefined
               ? `'PPB ${socketEventData.physicalPortId}, LD ${socketEventData.logicalDeviceId}'`
-              : `PPB ${socketEventData.physicalPortId}`}
+              : `'PPB ${socketEventData.physicalPortId}'`}
             &nbsp;will be connected.
             <br />
             Would you like to proceed with the connection?

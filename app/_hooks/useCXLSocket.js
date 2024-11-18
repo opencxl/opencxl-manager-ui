@@ -12,17 +12,23 @@ export const useCXLSocket = (socket) => {
     if (!socket) return;
     const getDeviceData = () => {
       socket.emit("device:get", (data) => {
-        setDeviceData(data["result"]);
+        if (JSON.stringify(deviceData) !== JSON.stringify(data["result"])) {
+          setDeviceData(data["result"]);
+        }
       });
     };
     const getPortData = () => {
       socket.emit("port:get", (data) => {
-        setPortData(data["result"]);
+        if (JSON.stringify(portData) !== JSON.stringify(data["result"])) {
+          setPortData(data["result"]);
+        }
       });
     };
     const getVCSData = () => {
       socket.emit("vcs:get", (data) => {
-        setVCSData(data["result"]);
+        if (JSON.stringify(vcsData) !== JSON.stringify(data["result"])) {
+          setVCSData(data["result"]);
+        }
       });
     };
     getDeviceData();

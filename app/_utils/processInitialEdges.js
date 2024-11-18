@@ -1,5 +1,7 @@
 export const processInitialEdges = ({ nodes, initialEdges }) => {
-  if (!nodes) return;
+  if (!nodes) {
+    return;
+  }
 
   const hosts = [];
   const vppbsForUSP = [];
@@ -37,6 +39,7 @@ export const processInitialEdges = ({ nodes, initialEdges }) => {
       }
     });
   });
+
   vppbs.forEach((vppb) => {
     ppbs.map((ppb) => {
       if (vppb.data.vppb.boundPortId === ppb.data.portId) {
