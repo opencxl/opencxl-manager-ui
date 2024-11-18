@@ -104,7 +104,7 @@ export const processCXLSocketData = ({
         return {
           hostId: matchingVCS?.uspId,
           vcsId: matchingVCS?.virtualCxlSwitchId,
-          from: matchingVCS?.vppb.vppbId || null,
+          from: matchingVCS?.vppb.vppbId ?? null,
           to: matchingVCS?.vppb.boundLdId,
         };
       });

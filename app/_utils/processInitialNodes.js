@@ -391,7 +391,6 @@ export const processInitialNodes = ({
           if (!availableNode.vppb) return "logical_device";
 
           if (availableNode.vppb.vppb.boundPortId) {
-            // 언바인딩 시도할 때
             return (availableLD || []).some(
               (ld) =>
                 ld.to === index &&
@@ -401,8 +400,7 @@ export const processInitialNodes = ({
               ? "logical_device unbound_logical_device"
               : "logical_device";
           } else {
-            // 바인딩 시도할 때
-            return !boundLD && // boundLD가 없는 경우만
+            return !boundLD &&
               availableNode.ppb?.some((p) => p.portId === logicalDevices.portId)
               ? "logical_device bound_logical_device"
               : "logical_device";

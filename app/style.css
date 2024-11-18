@@ -4,12 +4,6 @@
   transition: color 0.3s ease, background-color 0.3s ease;
 }
 
-/* .mld_ppb_node:hover {
-  background-color: #aca9f1 !important;
-  color: #ffffff !important;
-  transition: color 0.3s ease, background-color 0.3s ease;
-} */
-
 .vcs_group div {
   display: none !important;
 }
@@ -30,7 +24,7 @@
 }
 
 .unbound_logical_device {
-  border: 5px solid #0c1320 !important;
+  outline: 5px solid #0c1320 !important;
   backgound-color: #eeeeff;
 }
 
@@ -62,7 +56,7 @@
 }
 
 .bound_logical_device {
-  border: 5px solid #0c1320 !important;
+  outline: 5px solid #0c1320 !important;
   background-color: #eeeeff;
 }
 
