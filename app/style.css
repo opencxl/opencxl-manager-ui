@@ -1,0 +1,149 @@
+.vppb_node:hover {
+  background-color: #aca9f1 !important;
+  color: #ffffff !important;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.vcs_group div {
+  display: none !important;
+}
+
+.react-flow__handle {
+  background-color: #ff5a43 !important;
+  border: 5px solid #ff5a43 !important;
+  cursor: default !important;
+}
+
+.logical_device {
+  transition: transform 0.3s ease, opacity 0.3s ease !important;
+}
+
+.logical_device div {
+  display: none !important;
+}
+
+.unbound_logical_device {
+  outline: 3px solid #0c1320 !important;
+  backgound-color: #eeeeff;
+}
+
+.unbound_logical_device::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-image: url("./_img/LinkBreak.svg") !important;
+  background-size: auto !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  transition: transform 0.3s ease !important;
+  opacity: 0 !important;
+  transform: scale(0.8) !important;
+  transition: opacity 0.3s ease, transform 0.3s ease !important;
+}
+
+.unbound_logical_device:hover {
+  background-color: #0c1320 !important;
+  color: transparent !important;
+}
+
+.unbound_logical_device:hover::after {
+  transform: scale(1) !important;
+  opacity: 1 !important;
+}
+
+.bound_logical_device {
+  outline: 3px solid #0c1320 !important;
+  background-color: #eeeeff;
+}
+
+.bound_logical_device::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-image: url("./_img/Link.svg") !important;
+  background-size: auto !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  transition: transform 0.3s ease !important;
+  opacity: 0 !important;
+  transform: scale(0.8) !important;
+  transition: opacity 0.3s ease, transform 0.3s ease !important;
+}
+
+.bound_logical_device:hover {
+  background-color: #0c1320 !important;
+  color: transparent !important;
+}
+
+.bound_logical_device:hover::after {
+  transform: scale(1) !important;
+  opacity: 1 !important;
+}
+
+.bound_device_node {
+  transition: transform 0.3s ease, opacity 0.3s ease !important;
+}
+
+.bound_device_node::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-image: url("./_img/Link.svg") !important;
+  background-size: auto !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  transition: transform 0.3s ease !important;
+  opacity: 0 !important;
+  transform: scale(0.8) !important;
+  transition: opacity 0.3s ease, transform 0.3s ease !important;
+}
+
+.bound_device_node:hover {
+  background-color: #0c1320 !important;
+  color: transparent !important;
+}
+
+.bound_device_node:hover::after {
+  transform: scale(1) !important;
+  opacity: 1 !important;
+}
+
+.unbound_device_node {
+  transition: transform 0.3s ease, opacity 0.3s ease !important;
+}
+
+.unbound_device_node::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-image: url("./_img/LinkBreak.svg") !important;
+  background-size: auto !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  transition: transform 0.3s ease !important;
+  opacity: 0 !important;
+  transform: scale(0.8) !important;
+  transition: opacity 0.3s ease, transform 0.3s ease !important;
+}
+
+.unbound_device_node:hover {
+  background-color: #0c1320 !important;
+  color: transparent !important;
+}
+
+.unbound_device_node:hover::after {
+  transform: scale(1) !important;
+  opacity: 1 !important;
+}
