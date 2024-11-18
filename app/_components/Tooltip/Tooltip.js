@@ -7,7 +7,7 @@ const DeviceTooltip = ({ isOpen, node }) => {
   const rect = tooltipContainer.getBoundingClientRect();
 
   return ReactDOM.createPortal(
-    <div className="relative">
+    <div className="relative pointer-events-none">
       {node.data.deviceType === "SLD" ? (
         <div
           style={{
