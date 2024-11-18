@@ -19,8 +19,8 @@ const Dialog = ({
         {socketEventData.eventName === "binding" ? (
           <p className="text-sm">
             'vPPB {socketEventData.vppbId}' and&nbsp;
-            {socketEventData.logicalDeviceId !== undefined
-              ? `'PPB ${socketEventData.physicalPortId}, LD ${socketEventData.logicalDeviceId}'`
+            {socketEventData.ldId !== undefined
+              ? `'PPB ${socketEventData.physicalPortId}, LD ${socketEventData.ldId}'`
               : `'PPB ${socketEventData.physicalPortId}'`}
             &nbsp;will be connected.
             <br />
