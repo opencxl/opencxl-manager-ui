@@ -73,13 +73,6 @@ export default function Overview() {
       });
       setNodes(initialNodes);
     }
-
-    const initialEdges = [];
-    processInitialEdges({
-      nodes,
-      initialEdges,
-    });
-    setEdges(initialEdges);
   }, [
     portData,
     deviceData,
@@ -89,6 +82,17 @@ export default function Overview() {
     availableNode,
     availableLD,
   ]);
+
+  useEffect(() => {
+    if (!nodes) return;
+
+    const initialEdges = [];
+    processInitialEdges({
+      nodes,
+      initialEdges,
+    });
+    setEdges(initialEdges);
+  }, [nodes]);
 
   const handleClickNode = (_, node) => {
     if (node.data?.type === "vppbForPPB") {
