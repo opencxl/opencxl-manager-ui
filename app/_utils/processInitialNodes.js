@@ -320,6 +320,9 @@ export const processInitialNodes = ({
     });
   });
 
+  console.log("availableNode:", availableNode);
+  console.log("device", device[0]);
+
   /* Device */
   device.forEach((data, index) => {
     initialNodes.push({
@@ -335,8 +338,8 @@ export const processInitialNodes = ({
         height: `${data.deviceType === "SLD" ? nodeBox.height : "378"}px`,
         backgroundColor:
           data.deviceType === "SLD"
-            ? data.hosts.length > 0 && data.boundVPPBId.length > 0
-              ? data.hosts[0].color
+            ? data.boundVPPBId.length > 0
+              ? data.color
               : "#EEEEFF"
             : "#EEEEFF",
         border: "none",
@@ -376,20 +379,26 @@ export const processInitialNodes = ({
     });
   });
 
+  console.log("availableLD:", availableLD);
+
   device.forEach((data) => {
     if (data.deviceType === "MLD") {
       const { logicalDevices } = data;
 
       Array.from({ length: logicalDevices.numberOfLds }).forEach((_, index) => {
-        const boundLD = logicalDevices.boundLdId.find((ld) => ld.to === index);
+        const boundLD = logicalDevices.boundLdId[index];
+        const hostColor = boundLD.color;
 
-        const hostColor = boundLD
-          ? data.hosts[data.boundVPPBId.findIndex((id) => id === boundLD.from)]
-              ?.color
-          : "#D9D9D9";
+        console.log("availableLD", availableLD);
 
         const getClassName = () => {
           if (!availableNode.vppb) return "logical_device";
+
+          if (availableLD?.length > 0) {
+            return availableLD[index].target
+              ? "logical_device unbound_logical_device"
+              : "logical_device";
+          }
 
           if (availableNode.vppb.vppb.boundPortId) {
             return (availableLD || []).some(

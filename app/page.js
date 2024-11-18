@@ -104,41 +104,67 @@ export default function Overview() {
           const availableDevice = device.find(
             (data) => data.portId === node.data.vppb.boundPortId
           );
-          setAvailableNode({
-            vcs: node.data.virtualCxlSwitchId,
-            vppb: node.data,
-            ppb: [availableDevice],
-          });
-          if (availableDevice.deviceType === "MLD") {
-            setAvailableLD(availableDevice.logicalDevices.boundLdId);
+
+          if (availableDevice) {
+            setAvailableNode({
+              vcs: node.data.virtualCxlSwitchId,
+              vppb: node.data,
+              ppb: [availableDevice],
+            });
+
+            if (availableDevice.deviceType === "MLD") {
+              const ldIds = [];
+              availableDevice.logicalDevices.boundLdId.forEach((ld) =>
+                ldIds.push({ ...ld, target: false })
+              );
+
+              ldIds.forEach((ld) => {
+                if (ld.from === node.data.vppb.boundLdId) {
+                  ld.target = true;
+                }
+              });
+
+              setAvailableLD(ldIds);
+            }
           }
         } else {
-          const availableDevice = device.filter(
-            (data) =>
-              data.boundVPPBId.length === 0 ||
-              (data.deviceType === "MLD" &&
-                data.logicalDevices.numberOfLds >
-                  data.logicalDevices.boundLdId.length)
-          );
+          const availableDevice = [];
+          device.forEach((d) => {
+            if (d.deviceType === "MLD") {
+              if (d.logicalDevices.boundLdId.some((ld) => ld.to === -1)) {
+                availableDevice.push(d);
+              }
+            } else {
+              if (d.color === "#D9D9D9") {
+                availableDevice.push(d);
+              }
+            }
+          });
+
           setAvailableNode({
             vcs: node.data.virtualCxlSwitchId,
             vppb: node.data,
             ppb: [...availableDevice],
           });
 
-          if (availableDevice.deviceType === "MLD") {
-            setAvailableLD(data.logicalDevices.boundLdId);
-          }
+          const ldIds = [];
+          availableDevice.forEach((d) => {
+            if (d.deviceType === "MLD") {
+              d.logicalDevices.boundLdId.forEach((bld) => {
+                ldIds.push({ ...bld, target: bld.to === -1 });
+              });
+            }
+          });
+          setAvailableLD(ldIds);
         }
       }
     } else if (node.data?.type === "device") {
       if (node.data?.deviceType === "SLD") {
-        if (availableNode.vppb) {
-          if (
-            node.data.boundVPPBId.some(
-              (data) => data === availableNode?.vppb?.vppb.vppbId
-            )
-          ) {
+        // console.log("sld:", availableNode);
+        // console.log("node:", node.data);
+
+        if (availableNode.ppb) {
+          if (availableNode.ppb[0].color !== "#D9D9D9") {
             setSocketEventData({
               virtualCxlSwitchId: Number(availableNode.vcs),
               vppbId: Number(availableNode.vppb.vppb.vppbId),
@@ -154,6 +180,27 @@ export default function Overview() {
             });
             openDialog();
           }
+
+          // if (
+          //   node.data.boundVPPBId.some(
+          //     (data) => data === availableNode?.vppb?.vppb.vppbId
+          //   )
+          // ) {
+          //   setSocketEventData({
+          //     virtualCxlSwitchId: Number(availableNode.vcs),
+          //     vppbId: Number(availableNode.vppb.vppb.vppbId),
+          //     eventName: "unbinding",
+          //   });
+          //   openDialog();
+          // } else {
+          //   setSocketEventData({
+          //     virtualCxlSwitchId: Number(availableNode.vcs),
+          //     vppbId: Number(availableNode.vppb?.vppb.vppbId),
+          //     physicalPortId: Number(node.data.portId),
+          //     eventName: "binding",
+          //   });
+          //   openDialog();
+          // }
         }
       }
     } else if (node.data?.type === "logicalDevice") {

@@ -57,67 +57,103 @@ export const processCXLSocketData = ({
     });
   });
 
-  deviceData.forEach((dev) => {
-    const mld = mldData.find((m) => m.portId === dev.boundPortId);
-    let hosts = [];
-    let boundPorts = [];
+  const summaryMap = [];
+  let vcsIndex = 0;
 
-    vcs.forEach((v) => {
-      if (v.vppb.boundPortId === dev.boundPortId) {
-        const status = v.vppb.bindingStatus;
-        if (status === "BOUND_LD") {
-          const relatedHost = host.find((h) => h.portId === v.uspId);
-          hosts.push({
-            hostId: v.uspId,
-            color: relatedHost?.backgroundColor,
-          });
-          boundPorts.push(v.vppb.vppbId);
+  vcs.forEach((v) => {
+    if (v.hostPort) return;
+
+    const summary = {
+      order: vcsIndex++,
+      hostNo: v.uspId,
+      vcsNo: v.virtualCxlSwitchId,
+      ppbNo: -1,
+      ldNo: -1,
+      color: "#D9D9D9",
+      deviceType: "UNKNOWN",
+      deviceInfo: {},
+    };
+    summaryMap.push(summary);
+
+    if (v.vppb && v.vppb.bindingStatus === "BOUND_LD") {
+      summary.ppbNo = v.vppb.boundPortId;
+      if (v.vppb && v.vppb.boundLdId !== null) summary.ldNo = v.vppb.boundLdId;
+    }
+
+    const connectedDev = portData.find((pd) => pd.portId === summary.ppbNo);
+    if (connectedDev) {
+      if (connectedDev.connectedDeviceType.includes("_MLD")) {
+        summary.deviceType = "MLD";
+        const d = mldData.find((mld) => mld.portId === summary.ppbNo);
+        if (d) {
+          Object.assign(summary.deviceInfo, d);
         }
+      } else {
+        summary.deviceType = "SLD";
       }
-    });
-    const port = portData?.find((p) => p.portId === dev.boundPortId);
-    if (port && port.ltssmState === "L0") {
+    } else {
+      const d = deviceData[vcsIndex];
+      const p = portData.find((p) => p.portId === d.boundPortId);
+
+      summary.hostNo = -1;
+      summary.ppbNo = vcsIndex;
+
+      if (p) {
+        summary.deviceType = p.connectedDeviceType.includes("_MLD")
+          ? "MLD"
+          : "SLD";
+      }
+    }
+
+    const connectedHost = host.find((h) => h.portId === summary.hostNo);
+    if (connectedHost && summary.ppbNo !== -1) {
+      summary.color = connectedHost.backgroundColor;
+    }
+  });
+
+  console.log("summaryMap:", summaryMap);
+
+  deviceData.forEach((dev) => {
+    const targetPort = portData.find((p) => p.portId === dev.boundPortId);
+    const summary = summaryMap.find((s) => s.ppbNo === dev.boundPortId);
+
+    if (targetPort && summary && targetPort.ltssmState === "L0") {
       device.push({
         portType: "DSP",
-        portId: port.portId,
-        boundVPPBId: boundPorts,
-        hosts,
-        deviceType: mld ? "MLD" : "SLD",
-        logicalDevices: mld ? mld : null,
+        portId: summary.ppbNo,
+        boundVPPBId: summaryMap
+          .filter((s) => s.ppbNo === dev.boundPortId)
+          .map((s) => s.order),
+        hosts: [],
+        deviceType: summary.deviceType,
+        logicalDevices: {
+          ...summary.deviceInfo,
+          boundLdId: summaryMap.map((s) => ({
+            hostId: s.hostNo,
+            vcsId: s.vcsNo,
+            from: s.order,
+            to: s.ldNo,
+            color: s.color,
+          })),
+        },
+        color: summary.color,
       });
+
       ppb.push({
         portType: "DSP",
-        portId: port.portId,
-        boundVPPBId: boundPorts,
-        deviceType: mld ? "MLD" : "SLD",
+        portId: targetPort.portId,
+        boundVPPBId: summaryMap
+          .filter((s) => s.ppbNo === dev.boundPortId)
+          .map((s) => s.order),
+        deviceType: summary.deviceType,
       });
     } else {
-      device.push(null);
-      ppb.push(null);
+      // console.log("targetPort:", targetPort);
+      // console.log("summary:", summary);
     }
   });
 
-  device.forEach((dev, index) => {
-    if (dev?.deviceType === "MLD") {
-      const boundLdIds = dev.boundVPPBId.map((deviceVPPBID) => {
-        const matchingVCS = vcs.find((v) => v.vppb.vppbId === deviceVPPBID);
-        return {
-          hostId: matchingVCS?.uspId,
-          vcsId: matchingVCS?.virtualCxlSwitchId,
-          from: matchingVCS?.vppb.vppbId ?? null,
-          to: matchingVCS?.vppb.boundLdId,
-        };
-      });
-
-      device[index] = {
-        ...dev,
-        logicalDevices: {
-          ...dev.logicalDevices,
-          boundLdId: boundLdIds,
-        },
-      };
-    }
-  });
+  // console.log("device:", device);
 
   return {
     host,
@@ -125,4 +161,67 @@ export const processCXLSocketData = ({
     device,
     ppb,
   };
+
+  // deviceData.forEach((dev) => {
+  //   const port = portData?.find((p) => p.portId === dev.boundPortId);
+  //   if (port && port.ltssmState === "L0") {
+  //     device.push({
+  //       portType: "DSP",
+  //       portId: port.portId,
+  //       boundVPPBId: boundPorts,
+  //       hosts,
+  //       deviceType: mld ? "MLD" : "SLD",
+  //       logicalDevices: mld ? mld : null,
+  //     });
+  //     ppb.push({
+  //       portType: "DSP",
+  //       portId: port.portId,
+  //       boundVPPBId: boundPorts,
+  //       deviceType: mld ? "MLD" : "SLD",
+  //     });
+  //   } else {
+  //     device.push(null);
+  //     ppb.push(null);
+  //   }
+  // });
+
+  // device.forEach((dev, index) => {
+  //   if (dev?.deviceType === "MLD") {
+  //     const boundLdIds = dev.boundVPPBId.map((deviceVPPBID) => {
+  //       const matchingVCS = vcs.find((v) => v.vppb.vppbId === deviceVPPBID);
+  //       return {
+  //         hostId: matchingVCS?.uspId,
+  //         vcsId: matchingVCS?.virtualCxlSwitchId,
+  //         from: matchingVCS?.vppb.vppbId ?? null,
+  //         to: matchingVCS?.vppb.boundLdId,
+  //       };
+  //     });
+
+  //     boundLdIds.forEach((ld, index) => {
+  //       if (index >= 4) {
+  //         ld.hostId = 2;
+  //         ld.vcsId = 1;
+  //         ld.from += 5;
+  //         ld.to += 4;
+  //       }
+  //     });
+
+  //     device[index] = {
+  //       ...dev,
+  //       logicalDevices: {
+  //         ...dev.logicalDevices,
+  //         boundLdId: boundLdIds,
+  //       },
+  //     };
+  //   }
+  // });
+
+  // // console.log(device);
+
+  // return {
+  //   host,
+  //   vcs,
+  //   device,
+  //   ppb,
+  // };
 };
