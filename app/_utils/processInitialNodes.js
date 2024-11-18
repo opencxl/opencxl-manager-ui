@@ -437,6 +437,11 @@ export const processInitialNodes = ({
           parentId: `device_${data?.portId}`,
           extend: "parent",
           className: getClassName(),
+          selectable: !availableNode.ppb?.some((info) => {
+            return info.portId === data.portId;
+          })
+            ? false
+            : true,
         });
       });
     }

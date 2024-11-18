@@ -156,6 +156,7 @@ export default function Overview() {
         }
       }
     } else if (node.data?.type === "logicalDevice") {
+      if (!availableNode.vcs && !availableNode.vppb) return;
       if (
         availableNode.vppb?.vppb.boundPortId === node.data.mld.portId &&
         availableNode.vppb?.vppb.boundLdId === node.data.ldId
