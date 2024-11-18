@@ -37,7 +37,7 @@ export default function Overview() {
     virtualCxlSwitchId: null,
     vppbId: null,
     physicalPortId: null,
-    logicalDeviceId: null,
+    ldId: null,
     eventName: null,
   });
   const [availableNode, setAvailableNode] = useState({
@@ -169,7 +169,7 @@ export default function Overview() {
           virtualCxlSwitchId: Number(availableNode.vcs),
           vppbId: Number(availableNode.vppb?.vppb.vppbId),
           physicalPortId: Number(node.data.mld.portId),
-          logicalDeviceId: Number(node.data.ldId),
+          ldId: Number(node.data.ldId),
           eventName: "binding",
         });
         openDialog();
@@ -204,7 +204,7 @@ export default function Overview() {
           virtualCxlSwitchId: socketEventData.virtualCxlSwitchId,
           vppbId: socketEventData.vppbId,
           physicalPortId: socketEventData.physicalPortId,
-          logicalDeviceId: socketEventData.logicalDeviceId || null,
+          ldId: socketEventData.ldId || null,
         },
         (args) => {
           if (args.error) {
