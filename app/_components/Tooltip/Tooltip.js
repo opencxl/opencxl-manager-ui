@@ -13,7 +13,7 @@ const DeviceTooltip = ({ isOpen, node }) => {
           style={{
             position: "fixed",
             top: `${rect.top + 78}px`,
-            left: `${rect.right - 155}px`, // 40에서 80으로 수정
+            left: `${rect.right - 155}px`,
           }}
         >
           <div className="absolute w-0 h-0 -top-9 left-1/2 transform -translate-x-1/2 border-[20px] border-solid border-t-transparent border-x-transparent border-b-black rounded-lg"></div>
