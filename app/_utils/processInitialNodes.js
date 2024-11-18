@@ -368,6 +368,11 @@ export const processInitialNodes = ({
       }`,
       parentId: "group_ppb",
       extend: "parent",
+      selectable: availableNode.ppb?.some((info) => {
+        return info.portId === data.portId;
+      })
+        ? true
+        : false,
     });
   });
 
@@ -437,11 +442,11 @@ export const processInitialNodes = ({
           parentId: `device_${data?.portId}`,
           extend: "parent",
           className: getClassName(),
-          selectable: !availableNode.ppb?.some((info) => {
+          selectable: availableNode.ppb?.some((info) => {
             return info.portId === data.portId;
           })
-            ? false
-            : true,
+            ? true
+            : false,
         });
       });
     }
