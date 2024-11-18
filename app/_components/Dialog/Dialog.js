@@ -9,6 +9,7 @@ const Dialog = ({
 }) => {
   if (!isOpen) return null;
 
+  console.log("socketEventData: ", socketEventData);
   return ReactDOM.createPortal(
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="flex flex-col gap-8 justify-between bg-white rounded-lg p-8 w-[403px]">
@@ -16,20 +17,24 @@ const Dialog = ({
           {socketEventData.eventName === "binding" ? "Binding" : "Unbinding"} to
           the device?
         </h1>
-        <p className="text-sm">
-          'vPPB {socketEventData.vppbId}' and 'PPB{" "}
-          {socketEventData.physicalPortId}' will be&nbsp;
-          {socketEventData.eventName === "binding"
-            ? "connected"
-            : "disconnected"}
-          .
-          <br />
-          Would you like to proceed with the&nbsp;
-          {socketEventData.eventName === "binding"
-            ? "connection"
-            : "disconnection"}
-          ?
-        </p>
+        {socketEventData.eventName === "binding" ? (
+          <p className="text-sm">
+            'vPPB {socketEventData.vppbId}' and&nbsp;
+            {socketEventData.logicalDeviceId !== undefined
+              ? `'PPB ${socketEventData.physicalPortId}, LD ${socketEventData.logicalDeviceId}'`
+              : `PPB ${socketEventData.physicalPortId}`}
+            &nbsp;will be connected.
+            <br />
+            Would you like to proceed with the connection?
+          </p>
+        ) : (
+          <p className="text-sm">
+            'vPPB {socketEventData.vppbId}' will be disconnected.
+            <br />
+            Would you like to proceed with the disconnection?
+          </p>
+        )}
+
         <div className="flex justify-end">
           <button
             onClick={closeDialog}

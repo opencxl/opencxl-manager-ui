@@ -24,7 +24,7 @@
 }
 
 .unbound_logical_device {
-  outline: 5px solid #0c1320 !important;
+  outline: 3px solid #0c1320 !important;
   backgound-color: #eeeeff;
 }
 
@@ -56,7 +56,7 @@
 }
 
 .bound_logical_device {
-  outline: 5px solid #0c1320 !important;
+  outline: 3px solid #0c1320 !important;
   background-color: #eeeeff;
 }
 
