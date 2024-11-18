@@ -13,7 +13,6 @@
   border: 5px solid #ff5a43 !important;
   cursor: default !important;
 }
-//
 
 .logical_device {
   transition: transform 0.3s ease, opacity 0.3s ease !important;
@@ -87,7 +86,6 @@
   opacity: 1 !important;
 }
 
-//
 .bound_device_node {
   transition: transform 0.3s ease, opacity 0.3s ease !important;
 }

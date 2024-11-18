@@ -45,13 +45,12 @@ export const processInitialNodes = ({
   const ppbBoxWidth =
     ppb.length * nodeBox.width + gap.row * (ppb.length - 1) + padding.PPB * 2;
 
-  // 두 넓이를 비교하여 더 큰 값 선택
   const maxWidth = Math.max(totalVPPBWidth, ppbBoxWidth);
 
   const groupBox = {
     vcsWidth: vcsWidth,
     ppbWidth: ppbBoxWidth,
-    switchWidth: maxWidth + padding.PPB * 2, // 전체 박스에 패딩 추가
+    switchWidth: maxWidth + padding.PPB * 2,
     largeRadius: 53,
     smallRadius: 32,
   };
@@ -204,7 +203,6 @@ export const processInitialNodes = ({
       selectable: false,
     });
   });
-  // 글씨 조절
 
   /* vPPB For Host */
   vPPBForHOST.map((data, index) => {
@@ -317,7 +315,6 @@ export const processInitialNodes = ({
         zIndex: true ? defaultZIndex : ppbZIndex,
         opacity: 1,
       },
-      // className: `${data.deviceType === "MLD" ? "mld_ppb_node" : ""}`,
       parentId: "group_ppb",
       extend: "parent",
     });
@@ -332,7 +329,7 @@ export const processInitialNodes = ({
         x: padding.PPB + index * (nodeBox.width + gap.row) || 0,
         y: 136,
       },
-      data: { ...data, type: "device", label: data.deviceType }, // SLD 또는 MLD 구분 해야함.
+      data: { ...data, type: "device", label: data.deviceType },
       style: {
         width: `${nodeBox.width}px`,
         height: `${data.deviceType === "SLD" ? nodeBox.height : "378"}px`,
@@ -349,7 +346,6 @@ export const processInitialNodes = ({
         alignItems: `${data.deviceType === "SLD" ? "center" : "start"}`,
         paddingTop: `${data.deviceType === "SLD" ? null : "20px"}`,
         fontSize: "20px",
-        // zIndex: true ? defaultZIndex : deviceZIndex,
         zIndex: !availableNode.ppb?.some((info) => {
           return info.portId === data.portId;
         })

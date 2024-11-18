@@ -166,9 +166,7 @@ export default function Overview() {
           eventName: "unbinding",
         });
         openDialog();
-      }
-      // vppb가 아직 bound되지 않은 상태에서 새로운 LD를 클릭했을 때
-      else if (!availableNode.vppb?.vppb.boundPortId) {
+      } else if (!availableNode.vppb?.vppb.boundPortId) {
         setSocketEventData({
           virtualCxlSwitchId: Number(availableNode.vcs),
           vppbId: Number(availableNode.vppb?.vppb.vppbId),
