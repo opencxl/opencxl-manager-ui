@@ -235,7 +235,7 @@ export default function Overview() {
   };
 
   const handleMouseEnter = (_, node) => {
-    if (node.data?.type === "device") {
+    if (node.data?.type === "device" || node.data?.type === "logicalDevice") {
       setIsTooltipOpen(true);
       setTooltipData(node);
       return;
@@ -243,7 +243,7 @@ export default function Overview() {
   };
 
   const handleMouseLeave = (_, node) => {
-    if (node.data?.type === "device") {
+    if (node.data?.type === "device" || node.data?.type === "logicalDevice") {
       setIsTooltipOpen(false);
       setTooltipData(null);
       return;

@@ -24,7 +24,7 @@ const DeviceTooltip = ({ isOpen, node }) => {
             </p>
           </div>
         </div>
-      ) : (
+      ) : node.data.deviceType === "MLD" ? (
         <div
           style={{
             position: "fixed",
@@ -40,6 +40,29 @@ const DeviceTooltip = ({ isOpen, node }) => {
             </p>
             <p className="font-regular">
               Allocated LDs <br /> {node.data.logicalDevices.boundLdId.length}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div
+          style={{
+            position: "fixed",
+            top: `${rect.top - 82}px`,
+            left: `${rect.left - 215}px`,
+          }}
+        >
+          <div className="absolute w-0 h-0 -right-9 top-1/2 transform -translate-y-1/2 border-[20px] border-solid border-r-transparent border-y-transparent border-l-black rounded-lg"></div>
+          <div className="w-[196px] text-left p-6 z-4 rounded-lg text-white text-sm bg-black flex flex-col gap-6">
+            <p className="font-bold">Logical Device</p>
+            <p className="font-regular">
+              LD ID <br /> {node.data.ldId}
+            </p>
+            <p className="font-regular">
+              Size <br />{" "}
+              {node.data.mld.logicalDevices.ldAllocationList[
+                node.data.ldId * 2
+              ] * 256}
+              MB
             </p>
           </div>
         </div>
