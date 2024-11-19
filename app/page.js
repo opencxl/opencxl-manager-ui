@@ -113,22 +113,27 @@ export default function Overview() {
             setAvailableLD(availableDevice.logicalDevices.boundLdId);
           }
         } else {
-          const availableDevice = device.filter(
+          const availableDevices = device.filter(
             (data) =>
               data.boundVPPBId.length === 0 ||
               (data.deviceType === "MLD" &&
-                data.logicalDevices.numberOfLds >
-                  data.logicalDevices.boundLdId.length)
+                data.logicalDevices.boundLdId.some((ld) => ld.hostId === -1))
           );
           setAvailableNode({
             vcs: node.data.virtualCxlSwitchId,
             vppb: node.data,
-            ppb: [...availableDevice],
+            ppb: [...availableDevices],
           });
 
-          if (availableDevice.deviceType === "MLD") {
-            setAvailableLD(data.logicalDevices.boundLdId);
-          }
+          const lds = [];
+          availableDevices.forEach((dev) => {
+            if (dev.deviceType === "MLD") {
+              lds.push(
+                ...dev.logicalDevices.boundLdId.filter((ld) => ld.hostId === -1)
+              );
+            }
+          });
+          setAvailableLD(lds);
         }
       }
     } else if (node.data?.type === "device") {
@@ -168,7 +173,10 @@ export default function Overview() {
           eventName: "unbinding",
         });
         openDialog();
-      } else if (!availableNode.vppb?.vppb.boundPortId) {
+      } else if (
+        !availableNode.vppb?.vppb.boundPortId &&
+        node.data.hostId === -1
+      ) {
         setSocketEventData({
           virtualCxlSwitchId: Number(availableNode.vcs),
           vppbId: Number(availableNode.vppb?.vppb.vppbId),

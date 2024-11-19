@@ -322,6 +322,8 @@ export const processInitialNodes = ({
 
   /* Device */
   device.forEach((data, index) => {
+    const h = data.hosts.find((h) => h.hostId !== -1);
+
     initialNodes.push({
       id: `device_${data?.portId}`,
       type: "output",
@@ -334,11 +336,12 @@ export const processInitialNodes = ({
         width: `${nodeBox.width}px`,
         height: `${data.deviceType === "SLD" ? nodeBox.height : "378"}px`,
         backgroundColor:
-          data.deviceType === "SLD"
-            ? data.hosts.length > 0 && data.boundVPPBId.length > 0
-              ? data.hosts[0].color
-              : "#EEEEFF"
-            : "#EEEEFF",
+          data.deviceType === "SLD" ? (h ? h.color : "#EEEEFF") : "#EEEEFF",
+        // data.deviceType === "SLD"
+        //   ? data.hosts.length > 0 && data.boundVPPBId.length > 0
+        //     ? data.hosts[index].color
+        //     : "#EEEEFF"
+        //   : "#EEEEFF",
         border: "none",
         borderRadius: "8px",
         display: "flex",
@@ -380,13 +383,14 @@ export const processInitialNodes = ({
     if (data.deviceType === "MLD") {
       const { logicalDevices } = data;
 
-      Array.from({ length: logicalDevices.numberOfLds }).forEach((_, index) => {
-        const boundLD = logicalDevices.boundLdId.find((ld) => ld.to === index);
-
-        const hostColor = boundLD
-          ? data.hosts[data.boundVPPBId.findIndex((id) => id === boundLD.from)]
-              ?.color
-          : "#D9D9D9";
+      logicalDevices.boundLdId.forEach((ld, index) => {
+        let hostColor = "#D9D9D9";
+        const h = data.hosts.find(
+          (h) => ld.hostId === h.hostId && ld.vcsId === h.virtualCxlSwitchId
+        );
+        if (h) {
+          hostColor = h.color;
+        }
 
         const getClassName = () => {
           if (!availableNode.vppb) return "logical_device";
@@ -401,12 +405,12 @@ export const processInitialNodes = ({
               ? "logical_device unbound_logical_device"
               : "logical_device";
           } else {
-            return !boundLD &&
-              availableNode.ppb?.some((p) => p.portId === logicalDevices.portId)
+            return ld.hostId === -1
               ? "logical_device bound_logical_device"
               : "logical_device";
           }
         };
+
         initialNodes.push({
           id: `logicalDevice_${logicalDevices.portId}_${index}`,
           type: "default",
@@ -415,7 +419,7 @@ export const processInitialNodes = ({
             y: 56 + 40 * (index % 8),
           },
           data: {
-            ...(boundLD || {}),
+            ...(ld || {}),
             type: "logicalDevice",
             label: `LD ${index}`,
             ldId: index,
